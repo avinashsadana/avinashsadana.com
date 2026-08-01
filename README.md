@@ -1,43 +1,140 @@
-# Astro Starter Kit: Minimal
+# avinashsadana.com
 
-```sh
-npm create astro@latest -- --template minimal
+Personal site for Avinash Sadana — MBA candidate in International Business,
+founder of The WeDesi Festival and Cycle N' Chai, ultra-distance cyclist.
+
+**To edit content, read [CONTENT-GUIDE.md](./CONTENT-GUIDE.md).** This file is
+about how the thing is built.
+
+---
+
+## Stack
+
+| Layer | Choice |
+|---|---|
+| Framework | Astro 7 — static by default, on-demand only where needed |
+| Styling | Tailwind CSS 4, design tokens in `src/styles/global.css` |
+| Database | Supabase (Postgres), provisioned via the Vercel Marketplace |
+| Email | Resend, optional — see *Email notifications* below |
+| Hosting | Vercel |
+| Fonts | Fraunces + Inter + JetBrains Mono, self-hosted (no external requests) |
+
+---
+
+## Architecture
+
+Every content page is **prerendered to static HTML**. Only three endpoints and
+two pages run on the server, and they are the only things that touch the
+database.
+
+```
+Browser ──► static HTML (12 prerendered pages)
+       └──► /api/contact   ─┐
+       └──► /api/guestbook  ├─► service-role client ──► Supabase
+       └──► /api/views     ─┘
+       └──► /guestbook, /admin (server-rendered)
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+### Security model
 
-## 🚀 Project Structure
+Row Level Security is enabled on all three tables **with no policies at all**.
+The anon role can therefore read nothing and write nothing — verified, not
+assumed:
 
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+```
+service role sees contact_messages rows: 1
+anon READ contact_messages -> rows=0
+anon WRITE guestbook_entries -> BLOCKED (42501)
+anon RPC increment_page_view -> BLOCKED (42501)
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+The only way in or out is the service-role key, which lives in a Vercel
+environment variable and is used exclusively by server code in `src/pages/api/`
+and `src/lib/supabase.ts`. It never reaches the browser.
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+Spam is handled without a CAPTCHA: an off-screen honeypot field, a minimum
+submit time, and a per-IP-hash rate limit. IP addresses are salted and hashed —
+never stored raw.
 
-Any static assets, like images, can be placed in the `public/` directory.
+---
 
-## 🧞 Commands
+## Local development
 
-All commands are run from the root of the project, from a terminal:
+```bash
+npm install
+vercel env pull      # writes .env.local with Supabase credentials
+npm run dev          # http://localhost:4321
+```
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+| Script | Does |
+|---|---|
+| `npm run dev` | Dev server |
+| `npm run build` | Production build |
+| `npm run check` | TypeScript + Astro diagnostics |
+| `npm run test:e2e` | Playwright suite (44 tests, Chrome + mobile Safari) |
+| `npm run verify:build` | Asserts the build output — sitemap, prerendering, no leaked drafts or secrets |
+| `npm run verify` | All of the above, in order |
+| `npm run assets` | Regenerates `og.png` and favicons from the logo mark |
 
-## 👀 Want to learn more?
+`npm run assets` is deliberately manual: SVG text rasterises using the fonts of
+whichever machine runs it, so the images are generated locally, reviewed, and
+committed — rather than produced by a build container with different fonts.
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+---
+
+## Environment variables
+
+Supplied automatically by the Vercel Marketplace integration:
+
+- `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ANON_KEY`, `SUPABASE_JWT_SECRET`
+
+Set manually:
+
+- `ADMIN_PASSWORD` — sign-in for `/admin` (required for that page to work)
+- `RESEND_API_KEY` — optional, see below
+- `CONTACT_FROM_EMAIL`, `CONTACT_TO_EMAIL` — optional overrides
+
+### Email notifications
+
+Contact messages are written to Supabase **before** any email is attempted, and
+are always readable at `/admin`. Email is a convenience layer on top:
+
+- **No `RESEND_API_KEY`** — messages are stored and read at `/admin`. Nothing is lost.
+- **With a key** — a notification is also emailed. If Resend fails, the message
+  is still saved and the sender still sees success.
+
+Resend's free tier (3,000 emails/month) is available directly at
+[resend.com](https://resend.com); the Vercel Marketplace listing starts at
+$20/month, which this site does not need.
+
+---
+
+## Design
+
+The visual system comes from the logo in `private/avinash-logo-presentation.html`:
+ink `#22252A`, signature gold `#C08A2E`, paper `#F7F6F3`.
+
+Gold is used exactly as that system intends — as a mark, a rule, a terminal dot.
+It is **never** a text or button fill: gold on paper is 2.81:1, and white on gold
+is 3.04:1, both below the readable threshold. Accent *text* uses a darkened gold
+(5.11:1 on paper), and primary buttons are ink on paper (14.2:1).
+
+---
+
+## Testing
+
+The suite covers what would actually break in production, not implementation
+details:
+
+- every route returns 200 with no console errors
+- the contact form stores a message, verified by querying the database
+- a honeypot submission is accepted-looking but **not** stored
+- a guestbook entry is stored unapproved and does not appear publicly
+- the moderation endpoint rejects unauthenticated callers
+- share links carry the correctly encoded URL
+- theme survives client-side navigation
+- content is readable with JavaScript disabled
+- no horizontal overflow on mobile, tap targets ≥ 40px
+
+Tests assert against Supabase directly rather than through a test-only endpoint —
+nothing in `src/` exists purely to support tests.

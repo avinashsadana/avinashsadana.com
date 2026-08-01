@@ -1,5 +1,6 @@
-@import '@fontsource-variable/bricolage-grotesque';
+@import '@fontsource-variable/fraunces';
 @import '@fontsource-variable/inter';
+@import '@fontsource-variable/jetbrains-mono';
 @import 'tailwindcss';
 
 /* Theme is driven by a `.dark` class on <html>, set by an inline pre-paint
@@ -14,35 +15,57 @@
 :root {
   color-scheme: light;
 
-  --c-bg: oklch(98.4% 0.006 85);
-  --c-bg-raised: oklch(100% 0 0);
-  --c-bg-sunken: oklch(95.6% 0.008 85);
-  --c-text: oklch(19% 0.01 60);
-  --c-text-muted: oklch(48% 0.012 60);
-  --c-text-subtle: oklch(62% 0.01 60);
-  --c-border: oklch(88% 0.008 70);
-  --c-border-strong: oklch(19% 0.01 60);
-  --c-accent: oklch(57% 0.185 38);
-  --c-accent-hover: oklch(50% 0.19 38);
-  --c-accent-contrast: oklch(99% 0 0);
-  --c-accent-soft: oklch(94% 0.035 45);
+  /* Brand palette — see private/avinash-logo-presentation.html
+     INK #22252A · SIGNATURE GOLD #C08A2E · PAPER #F7F6F3 · SOFT INK #7A7E85 */
+  --c-bg: #f7f6f3;
+  --c-bg-raised: #ffffff;
+  --c-bg-sunken: #efede7;
+  --c-text: #22252a;
+  /* Soft ink (#7A7E85) only reaches 3.77:1 on paper, so body and label colours
+     are darkened until they clear 4.5:1. The brand hue is preserved; the
+     lightness is not, because unreadable text is not on brand either. */
+  --c-text-muted: #5f636a;
+  --c-text-subtle: #6b6f76;
+  --c-border: #e4e1da;
+  --c-border-strong: #22252a;
+
+  /* The signature gold, used exactly as the logo system intends: as a mark,
+     a rule, a terminal dot. Never as a text or button colour — it is 2.81:1
+     on paper, which no amount of intent makes legible. */
+  --c-gold: #c08a2e;
+  /* Darkened gold for accent *text* and links: 5.11:1 on paper. */
+  --c-accent: #8a6118;
+  --c-accent-hover: #6f4e12;
+  --c-accent-soft: #f2e9d8;
+
+  /* Primary buttons are ink on paper — 14.2:1, and true to a restrained,
+     monoline system where gold is the accent rather than the field. */
+  --c-button: #22252a;
+  --c-button-hover: #34383f;
+  --c-button-text: #f7f6f3;
 }
 
 .dark {
   color-scheme: dark;
 
-  --c-bg: oklch(15.5% 0.008 70);
-  --c-bg-raised: oklch(20% 0.009 70);
-  --c-bg-sunken: oklch(12% 0.007 70);
-  --c-text: oklch(96% 0.006 85);
-  --c-text-muted: oklch(72% 0.012 75);
-  --c-text-subtle: oklch(58% 0.012 75);
-  --c-border: oklch(29% 0.01 70);
-  --c-border-strong: oklch(96% 0.006 85);
-  --c-accent: oklch(72% 0.165 45);
-  --c-accent-hover: oklch(78% 0.15 45);
-  --c-accent-contrast: oklch(15.5% 0.008 70);
-  --c-accent-soft: oklch(27% 0.05 45);
+  --c-bg: #191c20;
+  --c-bg-raised: #22252a;
+  --c-bg-sunken: #141619;
+  --c-text: #f7f6f3;
+  --c-text-muted: #9aa0a8;
+  --c-text-subtle: #8e949c;
+  --c-border: #313640;
+  --c-border-strong: #f7f6f3;
+
+  --c-gold: #c08a2e;
+  /* On ink the gold can carry text directly — 6.49:1 at this lightness. */
+  --c-accent: #d2a04a;
+  --c-accent-hover: #e5c07b;
+  --c-accent-soft: #33291a;
+
+  --c-button: #f7f6f3;
+  --c-button-hover: #ffffff;
+  --c-button-text: #22252a;
 }
 
 @theme inline {
@@ -54,26 +77,29 @@
   --color-subtle: var(--c-text-subtle);
   --color-line: var(--c-border);
   --color-line-strong: var(--c-border-strong);
+  --color-gold: var(--c-gold);
   --color-accent: var(--c-accent);
   --color-accent-hover: var(--c-accent-hover);
-  --color-accent-contrast: var(--c-accent-contrast);
   --color-accent-soft: var(--c-accent-soft);
+  --color-button: var(--c-button);
+  --color-button-text: var(--c-button-text);
 
-  --font-display: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Fraunces Variable', ui-serif, Georgia, serif;
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, monospace;
 
-  --text-display: clamp(3rem, 12vw, 9.5rem);
-  --text-display--line-height: 0.86;
-  --text-display--letter-spacing: -0.045em;
-  --text-display--font-weight: 700;
+  --text-display: clamp(3.25rem, 12vw, 9rem);
+  --text-display--line-height: 0.9;
+  --text-display--letter-spacing: -0.03em;
+  --text-display--font-weight: 600;
 
-  --text-hero: clamp(2.25rem, 6.5vw, 4.75rem);
-  --text-hero--line-height: 0.98;
-  --text-hero--letter-spacing: -0.035em;
+  --text-hero: clamp(2.25rem, 6vw, 4.5rem);
+  --text-hero--line-height: 1.02;
+  --text-hero--letter-spacing: -0.022em;
 
-  --text-section: clamp(1.85rem, 4.2vw, 3rem);
-  --text-section--line-height: 1.02;
-  --text-section--letter-spacing: -0.03em;
+  --text-section: clamp(1.85rem, 4vw, 2.85rem);
+  --text-section--line-height: 1.08;
+  --text-section--letter-spacing: -0.018em;
 }
 
 /* ---------------------------------------------------------------------------
@@ -101,7 +127,10 @@
   h3,
   h4 {
     font-family: var(--font-display);
-    font-weight: 700;
+    /* Fraunces is a variable optical-size serif; 600 keeps the headline weight
+       editorial without tipping into the heaviness of a display grotesk. */
+    font-weight: 600;
+    font-optical-sizing: auto;
     text-wrap: balance;
   }
 
@@ -110,8 +139,8 @@
   }
 
   ::selection {
-    background-color: var(--c-accent);
-    color: var(--c-accent-contrast);
+    background-color: var(--c-gold);
+    color: #ffffff;
   }
 
   /* A visible, high-contrast focus ring everywhere — keyboard users should
@@ -122,11 +151,6 @@
     border-radius: 2px;
   }
 
-  /* Fonts are self-hosted; swap avoids invisible text while they load. */
-  @font-face {
-    font-family: 'Bricolage Grotesque Variable';
-    font-display: swap;
-  }
 }
 
 /* ---------------------------------------------------------------------------
@@ -146,27 +170,77 @@
     }
   }
 
-  /* Small uppercase label used to head every section. */
+  /* Small uppercase label used to head every section.
+     `flex` rather than `inline-flex` so it always occupies its own line —
+     inline-flex let a following inline-block element sit alongside it. */
   .eyebrow {
-    display: inline-flex;
+    display: flex;
+    width: fit-content;
     align-items: center;
     gap: 0.6rem;
+    font-family: var(--font-mono);
     font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.18em;
+    font-weight: 500;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--c-text-subtle);
   }
 
+  /* The gold rule — decorative, so the signature colour is used at full
+     strength here where contrast requirements do not apply. */
   .eyebrow::before {
     content: '';
     width: 1.75rem;
     height: 1px;
-    background-color: var(--c-accent);
+    background-color: var(--c-gold);
+    flex: none;
+  }
+
+  /* Primary action: ink field, paper text. Gold stays an accent, never a
+     button fill — white on gold is only 3.04:1. */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 999px;
+    background-color: var(--c-button);
+    padding: 0.875rem 1.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--c-button-text);
+    transition: background-color 0.2s ease;
+  }
+
+  .btn-primary:hover {
+    background-color: var(--c-button-hover);
+  }
+
+  .btn-primary:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 1px solid var(--c-border-strong);
+    border-radius: 999px;
+    padding: 0.875rem 1.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--c-text);
+    transition: background-color 0.2s ease;
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--c-bg-sunken);
   }
 
   .link-underline {
-    background-image: linear-gradient(var(--c-accent), var(--c-accent));
+    background-image: linear-gradient(var(--c-gold), var(--c-gold));
     background-size: 0% 1.5px;
     background-position: 0 100%;
     background-repeat: no-repeat;

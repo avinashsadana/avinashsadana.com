@@ -1,0 +1,31 @@
+# Certifications shown on /about and /work.
+
+- id: lean-six-sigma
+  name: Lean Six Sigma Green Belt
+  issuer: KPMG
+  order: 1
+
+- id: iot-ai-ml
+  name: Designing and Modelling of IoT, AI & ML Systems
+  issuer: AICTE Training and Learning (ATAL) Academy
+  order: 2
+
+- id: communication
+  name: Communication Masterclass — Public Speaking & Storytelling
+  issuer: The Think School
+  order: 3
+
+- id: project-finance
+  name: Project Finance Fundamentals — Infrastructure & Energy
+  issuer: Meta Brains
+  order: 4
+
+- id: quantitative-modelling
+  name: Fundamentals of Quantitative Modelling
+  issuer: University of Pennsylvania
+  order: 5
+
+- id: fly-scholar
+  name: FLY Scholar Leadership Program
+  issuer: The Competitiveness Mindset Institute (CMI), USA
+  order: 6

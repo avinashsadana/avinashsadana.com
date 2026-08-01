@@ -18,9 +18,14 @@ export default defineConfig({
   integrations: [
     mdx(),
     sitemap({
-      filter: (page) => !page.includes('/api/'),
+      // Keep private and machine-only routes out of the index, matching robots.txt.
+      filter: (page) => !page.includes('/api/') && !page.includes('/admin'),
     }),
   ],
+  // The dev toolbar injects its own headings and landmarks into the page, which
+  // makes accessibility assertions ambiguous. It stays on for normal `astro dev`
+  // and is switched off for the Playwright run.
+  devToolbar: { enabled: process.env.PW_TEST !== '1' },
   vite: {
     plugins: [tailwindcss()],
   },

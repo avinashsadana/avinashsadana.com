@@ -1,0 +1,21 @@
+{
+  "name": "Avinash Sadana",
+  "short_name": "Avinash",
+  "description": "Supply chain and operations, built on the discipline of endurance sport.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f6f3",
+  "theme_color": "#f7f6f3",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

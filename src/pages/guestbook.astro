@@ -1,0 +1,255 @@
+---
+import FormField from '../components/FormField.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Section from '../components/Section.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { isSupabaseConfigured, getSupabase } from '../lib/supabase';
+
+// Rendered on demand so the guestbook is current the moment an entry is
+// approved, rather than waiting for the next deploy.
+export const prerender = false;
+
+interface Entry {
+  id: string;
+  name: string;
+  role: string | null;
+  message: string;
+  created_at: string;
+}
+
+let entries: Entry[] = [];
+let loadFailed = false;
+
+if (isSupabaseConfigured()) {
+  const { data, error } = await getSupabase()
+    .from('guestbook_entries')
+    .select('id, name, role, message, created_at')
+    .eq('approved', true)
+    .order('created_at', { ascending: false })
+    .limit(100);
+
+  if (error) {
+    console.error('[guestbook page] read failed', error);
+    loadFailed = true;
+  } else {
+    entries = (data ?? []) as Entry[];
+  }
+}
+
+const formatWhen = (value: string) =>
+  new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).format(
+    new Date(value),
+  );
+---
+
+<BaseLayout
+  title="Guestbook"
+  description="Leave a note for Avinash Sadana — a short message, an endorsement, or just a hello."
+>
+  <PageHeader
+    eyebrow="Guestbook"
+    title="Leave a note"
+    lead="Worked with me, ridden with me, or been to a WeDesi edition? Say something. Every note is read before it appears here."
+  />
+
+  <Section>
+    <div class="grid gap-14 lg:grid-cols-[1fr_1.2fr] lg:gap-20">
+      <form id="guestbook-form" class="reveal space-y-6 lg:sticky lg:top-28 lg:self-start" novalidate>
+        <div class="absolute -left-[9999px] h-px w-px overflow-hidden" aria-hidden="true">
+          <label for="website">Website</label>
+          <input id="website" name="website" type="text" tabindex="-1" autocomplete="off" />
+        </div>
+
+        <FormField
+          name="name"
+          label="Your name"
+          required
+          maxlength={80}
+          autocomplete="name"
+          placeholder="Priya Sharma"
+        />
+        <FormField
+          name="role"
+          label="Role or connection"
+          maxlength={120}
+          placeholder="Colleague at Godrej · Rider · Friend"
+        />
+        <FormField
+          name="message"
+          label="Your note"
+          type="textarea"
+          required
+          maxlength={600}
+          rows={5}
+          hint="Up to 600 characters."
+        />
+
+        <div class="flex flex-wrap items-center gap-4">
+          <button
+            type="submit"
+            class="btn-primary"
+            data-submit
+          >
+            <span data-submit-label>Sign the guestbook</span>
+          </button>
+        </div>
+
+        <p class="text-xs text-subtle">
+          Notes are reviewed before publishing, so yours won’t appear straight away.
+        </p>
+
+        <div
+          class="rounded-xl border px-5 py-4 text-sm font-medium"
+          role="status"
+          aria-live="polite"
+          data-form-status
+          hidden
+        >
+        </div>
+      </form>
+
+      <div>
+        {
+          loadFailed ? (
+            <p class="prose-body">
+              The guestbook is having a moment. Please try again shortly.
+            </p>
+          ) : entries.length === 0 ? (
+            <div class="rounded-2xl border border-dashed border-line bg-bg-raised p-10 text-center">
+              <p class="font-display text-xl font-bold tracking-tight text-ink">
+                No notes yet.
+              </p>
+              <p class="prose-body mx-auto mt-2 text-[0.95rem]">
+                Be the first — the form is right there.
+              </p>
+            </div>
+          ) : (
+            <ul class="space-y-5">
+              {entries.map((entry) => (
+                <li class="rounded-2xl border border-line bg-bg-raised p-6 lg:p-7">
+                  <blockquote class="prose-body text-[0.95rem] whitespace-pre-line">
+                    {entry.message}
+                  </blockquote>
+                  <div class="mt-5 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-t border-line pt-4">
+                    <p class="text-sm font-semibold text-ink">
+                      {entry.name}
+                      {entry.role && <span class="font-normal text-muted"> · {entry.role}</span>}
+                    </p>
+                    <time class="text-xs text-subtle" datetime={entry.created_at}>
+                      {formatWhen(entry.created_at)}
+                    </time>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </div>
+    </div>
+  </Section>
+</BaseLayout>
+
+<script>
+  interface ApiResponse {
+    ok?: boolean;
+    message?: string;
+    error?: string;
+    field?: string;
+  }
+
+  function bindGuestbookForm() {
+    const form = document.getElementById('guestbook-form') as HTMLFormElement | null;
+    if (!form || form.dataset.bound === 'true') return;
+    form.dataset.bound = 'true';
+
+    const renderedAt = Date.now();
+    const button = form.querySelector<HTMLButtonElement>('[data-submit]');
+    const label = form.querySelector<HTMLElement>('[data-submit-label]');
+    const status = form.querySelector<HTMLElement>('[data-form-status]');
+
+    const clearErrors = () => {
+      form.querySelectorAll<HTMLElement>('[data-field-error]').forEach((el) => {
+        el.textContent = '';
+        el.hidden = true;
+      });
+      form.querySelectorAll('[aria-invalid]').forEach((el) => el.removeAttribute('aria-invalid'));
+    };
+
+    const showFieldError = (field: string, message: string) => {
+      const input = form.querySelector<HTMLElement>(`[name="${field}"]`);
+      const error = document.getElementById(`${field}-error`);
+      input?.setAttribute('aria-invalid', 'true');
+      if (error) {
+        error.textContent = message;
+        error.hidden = false;
+      }
+      (input as HTMLInputElement | null)?.focus();
+    };
+
+    const showStatus = (message: string, ok: boolean) => {
+      if (!status) return;
+      status.textContent = message;
+      status.hidden = false;
+      status.className = ok
+        ? 'rounded-xl border border-accent/40 bg-accent-soft px-5 py-4 text-sm font-medium text-accent'
+        : 'rounded-xl border border-line bg-bg-sunken px-5 py-4 text-sm font-medium text-ink';
+    };
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      clearErrors();
+
+      const data = new FormData(form);
+      const payload = {
+        name: String(data.get('name') ?? ''),
+        role: String(data.get('role') ?? ''),
+        message: String(data.get('message') ?? ''),
+        website: String(data.get('website') ?? ''),
+        elapsedMs: Date.now() - renderedAt,
+      };
+
+      if (payload.name.trim().length < 2) {
+        showFieldError('name', 'Please add your name.');
+        return;
+      }
+      if (payload.message.trim().length < 5) {
+        showFieldError('message', 'Please write a slightly longer note.');
+        return;
+      }
+
+      if (button) button.disabled = true;
+      if (label) label.textContent = 'Sending…';
+
+      try {
+        const response = await fetch('/api/guestbook', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        const result = (await response.json().catch(() => ({}))) as ApiResponse;
+
+        if (response.ok && result.ok) {
+          form.reset();
+          showStatus(result.message ?? 'Thanks — your note is with me for review.', true);
+          return;
+        }
+
+        if (result.field) {
+          showFieldError(result.field, result.error ?? 'Please check this field.');
+          return;
+        }
+
+        showStatus(result.error ?? 'Something went wrong. Please try again.', false);
+      } catch {
+        showStatus('Couldn’t reach the server. Check your connection and try again.', false);
+      } finally {
+        if (button) button.disabled = false;
+        if (label) label.textContent = 'Sign the guestbook';
+      }
+    });
+  }
+
+  bindGuestbookForm();
+  document.addEventListener('astro:page-load', bindGuestbookForm);
+</script>

@@ -1,0 +1,32 @@
+---
+/**
+ * The mark from the logo system: one unbroken stroke from A into S, with the
+ * gold terminal dot where the pen lifts. `currentColor` on the stroke lets it
+ * invert automatically between light and dark themes; the dot stays the
+ * signature gold in both, exactly as the system specifies.
+ */
+interface Props {
+  size?: number;
+  class?: string;
+}
+
+const { size = 32, class: className } = Astro.props;
+---
+
+<svg
+  viewBox="0 0 120 120"
+  width={size}
+  height={size}
+  class:list={['shrink-0', className]}
+  role="img"
+  aria-label="Avinash Sadana"
+>
+  <path
+    d="M24,96 L44,24 L64,96 C34,96 34,66 64,66 C94,66 94,36 64,36"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="10"
+    stroke-linecap="round"
+    stroke-linejoin="round"></path>
+  <circle cx="64" cy="36" r="6" fill="var(--c-gold)"></circle>
+</svg>

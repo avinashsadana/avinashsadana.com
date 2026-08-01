@@ -1,0 +1,229 @@
+---
+import ArrowLink from '../components/ArrowLink.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Section from '../components/Section.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import {
+  dateRange,
+  getCapabilities,
+  getCertifications,
+  getExperience,
+  getPrograms,
+} from '../lib/content';
+import { render } from 'astro:content';
+
+const experience = await getExperience();
+const programs = await getPrograms();
+const capabilities = await getCapabilities();
+const certifications = await getCertifications();
+
+const experienceWithBody = await Promise.all(
+  experience.map(async (entry) => ({ entry, Content: (await render(entry)).Content })),
+);
+const programsWithBody = await Promise.all(
+  programs.map(async (entry) => ({ entry, Content: (await render(entry)).Content })),
+);
+---
+
+<BaseLayout
+  title="Work"
+  description="Avinash Sadana’s professional experience in procurement, supply chain and manufacturing operations, plus current programme work, capabilities and certifications."
+>
+  <PageHeader
+    eyebrow="Work"
+    title="Operations, sourcing and the work in between"
+    lead="Procurement and supply chain inside heavy engineering, quality and production planning on a live manufacturing floor, and the programme work I’m running now."
+  />
+
+  {
+    programsWithBody.length > 0 && (
+      <Section
+        eyebrow="Current"
+        title="Project & programme management"
+        lead="Delivery work I’m running at the moment."
+        id="programs"
+        divider
+      >
+        <div class="space-y-6">
+          {programsWithBody.map(({ entry, Content }) => (
+            <article
+              id={entry.id}
+              class="reveal scroll-mt-24 rounded-2xl border border-line bg-bg-raised p-7 lg:p-10"
+            >
+              <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+                <div>
+                  <h3 class="font-display text-2xl font-bold tracking-tight text-ink">
+                    {entry.data.title}
+                  </h3>
+                  <p class="mt-1.5 text-sm font-medium text-accent">
+                    {entry.data.orgUrl ? (
+                      <a
+                        href={entry.data.orgUrl}
+                        class="link-underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {entry.data.org}
+                      </a>
+                    ) : (
+                      entry.data.org
+                    )}
+                  </p>
+                </div>
+                <p class="text-sm font-medium text-subtle tabular-nums">
+                  {dateRange(entry.data.start, entry.data.end, entry.data.current)}
+                </p>
+              </div>
+
+              <p class="prose-body mt-5">{entry.data.summary}</p>
+
+              {entry.data.highlights.length > 0 && (
+                <ul class="mt-6 space-y-3">
+                  {entry.data.highlights.map((item) => (
+                    <li class="prose-body relative pl-6 text-[0.95rem]">
+                      <span
+                        class="absolute top-[0.7em] left-0 size-1.5 rounded-full bg-gold"
+                        aria-hidden="true"
+                      />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {entry.data.methods.length > 0 && (
+                <ul class="mt-7 flex flex-wrap gap-2 border-t border-line pt-6">
+                  {entry.data.methods.map((method) => (
+                    <li class="rounded-full border border-line px-3 py-1.5 text-xs font-medium text-muted">
+                      {method}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <div class="prose-body mt-6 space-y-4 [&_p]:m-0">
+                <Content />
+              </div>
+            </article>
+          ))}
+        </div>
+      </Section>
+    )
+  }
+
+  <Section eyebrow="Experience" title="Professional experience" id="experience" divider>
+    <div class="space-y-6">
+      {
+        experienceWithBody.map(({ entry, Content }) => (
+          <article
+            id={entry.id}
+            class="reveal scroll-mt-24 rounded-2xl border border-line bg-bg-raised p-7 lg:p-10"
+          >
+            <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+              <div>
+                <h3 class="font-display text-2xl font-bold tracking-tight text-ink lg:text-3xl">
+                  {entry.data.orgUrl ? (
+                    <a
+                      href={entry.data.orgUrl}
+                      class="link-underline"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {entry.data.org}
+                    </a>
+                  ) : (
+                    entry.data.org
+                  )}
+                </h3>
+                <p class="mt-1.5 text-sm font-medium text-accent">{entry.data.role}</p>
+              </div>
+              <p class="text-sm font-medium text-subtle tabular-nums">
+                {dateRange(entry.data.start, entry.data.end, entry.data.current)}
+              </p>
+            </div>
+
+            <p class="prose-body mt-5">{entry.data.summary}</p>
+
+            {entry.data.highlights.length > 0 && (
+              <ul class="mt-6 space-y-3">
+                {entry.data.highlights.map((item) => (
+                  <li class="prose-body relative pl-6 text-[0.95rem]">
+                    <span
+                      class="absolute top-[0.7em] left-0 size-1.5 rounded-full bg-gold"
+                      aria-hidden="true"
+                    />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {entry.data.projects.length > 0 && (
+              <div class="mt-8 grid gap-4 border-t border-line pt-7 sm:grid-cols-2">
+                {entry.data.projects.map((project) => (
+                  <div class="rounded-xl bg-bg-sunken p-5">
+                    <p class="text-xs font-semibold tracking-[0.14em] text-subtle uppercase">
+                      Project
+                    </p>
+                    <h4 class="mt-2 font-display text-base font-bold text-ink">{project.title}</h4>
+                    <p class="prose-body mt-2 text-[0.9rem]">{project.detail}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div class="prose-body mt-7 space-y-4 border-t border-line pt-7 [&_p]:m-0">
+              <Content />
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </Section>
+
+  <Section
+    eyebrow="Capabilities"
+    title="What I bring"
+    lead="Grouped by where it was actually learned rather than by keyword."
+    id="capabilities"
+    divider
+  >
+    <div class="grid gap-px overflow-hidden rounded-2xl border border-line bg-line md:grid-cols-2">
+      {
+        capabilities.map((group) => (
+          <div class="bg-bg p-7 lg:p-8">
+            <h3 class="font-display text-lg font-bold tracking-tight text-ink">
+              {group.data.group}
+            </h3>
+            {group.data.blurb && <p class="prose-body mt-2.5 text-[0.9rem]">{group.data.blurb}</p>}
+            <ul class="mt-5 flex flex-wrap gap-2">
+              {group.data.items.map((item) => (
+                <li class="rounded-full border border-line px-3 py-1.5 text-xs font-medium text-muted">
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </Section>
+
+  <Section eyebrow="Certifications" title="Formal training" id="certifications" divider>
+    <ul class="divide-y divide-line border-y border-line">
+      {
+        certifications.map((cert) => (
+          <li class="reveal flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-5">
+            <p class="font-display text-base font-semibold text-ink">{cert.data.name}</p>
+            <p class="text-sm text-muted">{cert.data.issuer}</p>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="mt-9 flex flex-wrap gap-x-8 gap-y-3">
+      <ArrowLink href="/resume">Read the full résumé</ArrowLink>
+      <ArrowLink href="/contact">Start a conversation</ArrowLink>
+    </div>
+  </Section>
+</BaseLayout>

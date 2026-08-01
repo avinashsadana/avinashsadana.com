@@ -1,0 +1,56 @@
+# Achievements and recognitions shown on /about.
+# category must be one of: leadership | academic | sport | creative
+
+- id: business-hackathon
+  title: 1st Runner-up, Business Idea Hackathon 2025
+  detail: MIT World Peace University
+  year: '2025'
+  category: academic
+  order: 1
+
+- id: india-automation-games
+  title: Represented Vadodara City at the India Automation Games (Asia-Pacific)
+  detail: International Society of Automation
+  year: '2022'
+  category: academic
+  order: 2
+
+- id: best-ncc-cadet
+  title: Best NCC Cadet of Gujarat
+  detail: >-
+    Awarded across the Army, Navy and Air Force wings. Led and trained cadets
+    across multiple camps and programmes.
+  year: '2015–16'
+  category: leadership
+  order: 3
+
+- id: best-nss-volunteer
+  title: Best NSS Volunteer, SVIT
+  year: '2018–19'
+  category: leadership
+  order: 4
+
+- id: national-integration-camp
+  title: Selected representative for Team Gujarat at the National Integration Camp
+  detail: Andhra Pradesh, India
+  category: leadership
+  order: 5
+
+- id: life-skills-mentor
+  title: Life Skills Development Mentor
+  detail: >-
+    Invited twice by The Fabindia School and other institutions to mentor
+    students on life skills.
+  category: leadership
+  order: 6
+
+- id: state-awards-creative
+  title: Two state-level awards in Photography and Poetry
+  category: creative
+  order: 7
+
+- id: deccan-cliffhanger-award
+  title: 2nd Rank, Deccan Cliffhanger 646 km Ultra Race
+  detail: Pune to Goa
+  category: sport
+  order: 8

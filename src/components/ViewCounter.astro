@@ -1,0 +1,43 @@
+---
+// Renders nothing visible until the count arrives, so a slow or failed request
+// never shows a broken "0 views" or a stuck spinner.
+---
+
+<p class="tabular-nums text-subtle" data-view-counter hidden>
+  <span data-view-count></span> views
+</p>
+
+<script>
+  // `astro:page-load` also fires on the very first load, so without this guard
+  // the initial view would be counted twice.
+  let countedPath: string | null = null;
+
+  async function recordView() {
+    const el = document.querySelector<HTMLElement>('[data-view-counter]');
+    const value = el?.querySelector<HTMLElement>('[data-view-count]');
+    if (!el || !value) return;
+
+    const path = window.location.pathname.replace(/\/+$/, '') || '/';
+    if (countedPath === path) return;
+    countedPath = path;
+
+    try {
+      const response = await fetch('/api/views', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path }),
+      });
+      if (!response.ok) return;
+
+      const data = (await response.json()) as { count?: number };
+      if (typeof data.count !== 'number') return;
+
+      value.textContent = new Intl.NumberFormat('en-IN').format(data.count);
+      el.hidden = false;
+    } catch {
+      // Counting views is decorative. If it fails, the page is unaffected.
+    }
+  }
+
+  document.addEventListener('astro:page-load', recordView);
+</script>

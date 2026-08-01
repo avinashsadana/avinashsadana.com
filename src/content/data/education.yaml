@@ -1,0 +1,20 @@
+# Education shown on /about.
+
+- id: mba
+  degree: Master of Business Administration
+  field: International Business
+  institution: MIT World Peace University
+  location: Pune, India
+  start: '2024'
+  end: '2026'
+  order: 1
+
+- id: be
+  degree: Bachelor of Engineering
+  field: Instrumentation & Control Engineering
+  institution: Sardar Vallabhbhai Patel Institute of Technology, Gujarat Technological University
+  location: Gujarat, India
+  start: '2019'
+  end: '2023'
+  note: Graduated with Distinction
+  order: 2

@@ -1,0 +1,131 @@
+---
+import { nav, site } from '../site.config';
+import Logo from './Logo.astro';
+import ThemeToggle from './ThemeToggle.astro';
+
+const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
+---
+
+<!-- Deliberately not `transition:persist`: the header re-renders on navigation so
+     the active-page highlight and aria-current stay correct. -->
+<header class="sticky top-0 z-50 border-b border-line/70 bg-bg/85 backdrop-blur-md">
+  <div class="shell flex h-16 items-center justify-between gap-4 lg:h-20">
+    <!-- The wordmark lockup: mark, then the given name in full ink and the
+         surname a shade lighter — this is a personal site, not a firm. -->
+    <a
+      href="/"
+      class="flex items-center gap-2.5 whitespace-nowrap text-ink"
+      aria-label={`${site.name} — home`}
+    >
+      <Logo size={30} />
+      <span class="font-display text-lg font-semibold tracking-tight lg:text-xl">
+        avinash <span class="text-subtle">sadana</span>
+      </span>
+    </a>
+
+    <nav class="hidden items-center gap-7 lg:flex" aria-label="Primary">
+      {
+        nav.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              'link-underline text-sm font-medium transition-colors',
+              isActive(item.href) ? 'text-ink' : 'text-muted hover:text-ink',
+            ]}
+            aria-current={isActive(item.href) ? 'page' : undefined}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <ThemeToggle />
+      <button
+        type="button"
+        id="menu-toggle"
+        class="grid size-10 place-items-center rounded-full border border-line text-ink transition-colors hover:border-line-strong lg:hidden"
+        aria-label="Open menu"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+      >
+        <svg
+          class="size-[18px]"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <path class="menu-open-icon" d="M3.5 7.5h17M3.5 12h17M3.5 16.5h17"></path>
+          <path class="menu-close-icon hidden" d="M5.5 5.5l13 13M18.5 5.5l-13 13"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div
+    id="mobile-menu"
+    class="hidden border-t border-line bg-bg lg:hidden"
+  >
+    <nav class="shell flex flex-col py-3" aria-label="Mobile">
+      {
+        nav.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              'border-b border-line/60 py-3.5 font-display text-lg font-semibold tracking-tight last:border-0',
+              isActive(item.href) ? 'text-accent' : 'text-ink',
+            ]}
+            aria-current={isActive(item.href) ? 'page' : undefined}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+</header>
+
+<script>
+  function bindMenu() {
+    const button = document.getElementById('menu-toggle');
+    const menu = document.getElementById('mobile-menu');
+    if (!button || !menu || button.dataset.bound === 'true') return;
+    button.dataset.bound = 'true';
+
+    const openIcon = button.querySelector('.menu-open-icon');
+    const closeIcon = button.querySelector('.menu-close-icon');
+
+    const setOpen = (open: boolean) => {
+      menu.classList.toggle('hidden', !open);
+      button.setAttribute('aria-expanded', String(open));
+      button.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      openIcon?.classList.toggle('hidden', open);
+      closeIcon?.classList.toggle('hidden', !open);
+    };
+
+    button.addEventListener('click', () => {
+      setOpen(button.getAttribute('aria-expanded') !== 'true');
+    });
+
+    // Escape closes the menu, and returns focus to the button that opened it.
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && button.getAttribute('aria-expanded') === 'true') {
+        setOpen(false);
+        button.focus();
+      }
+    });
+
+    // Any resize into desktop layout resets the menu so it can't be stuck open.
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 1024) setOpen(false);
+    });
+  }
+
+  bindMenu();
+  document.addEventListener('astro:page-load', bindMenu);
+</script>

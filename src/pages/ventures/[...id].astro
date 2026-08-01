@@ -1,0 +1,121 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { render } from 'astro:content';
+import ArrowLink from '../../components/ArrowLink.astro';
+import ShareButtons from '../../components/ShareButtons.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { dateRange, getVentures } from '../../lib/content';
+import { site } from '../../site.config';
+
+export const getStaticPaths = (async () => {
+  const ventures = await getVentures();
+  return ventures.map((venture) => ({
+    params: { id: venture.id },
+    props: { venture },
+  }));
+}) satisfies GetStaticPaths;
+
+const { venture } = Astro.props;
+const { Content } = await render(venture);
+const { data } = venture;
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: data.name,
+  description: data.summary,
+  ...(data.url ? { url: data.url } : {}),
+  founder: { '@id': `${site.url}/#person` },
+};
+---
+
+<BaseLayout title={data.name} description={data.summary} schema={schema}>
+  <article>
+    <header class="shell pt-14 pb-10 lg:pt-20 lg:pb-14">
+      <a
+        href="/ventures"
+        class="link-underline text-sm font-medium text-muted hover:text-ink"
+      >
+        ← All ventures
+      </a>
+
+      <p class="eyebrow reveal mt-8">
+        {data.role} · {dateRange(data.start, data.end, data.current)}
+      </p>
+      <h1
+        class="reveal mt-5 font-display text-hero font-bold text-ink"
+        style="--reveal-delay: 60ms"
+      >
+        {data.name}
+      </h1>
+      <p
+        class="reveal mt-5 max-w-2xl font-display text-xl font-semibold text-muted lg:text-2xl"
+        style="--reveal-delay: 110ms"
+      >
+        {data.tagline}
+      </p>
+
+      {
+        data.url && (
+          <div class="mt-7">
+            <ArrowLink href={data.url} external>
+              {data.url.replace(/^https?:\/\//, '')}
+            </ArrowLink>
+          </div>
+        )
+      }
+    </header>
+
+    {
+      data.stats.length > 0 && (
+        <div class="border-y border-line bg-bg-raised">
+          <dl class="shell grid grid-cols-2 gap-x-6 gap-y-8 py-10 sm:grid-cols-3 lg:py-12">
+            {data.stats.map((stat) => (
+              <div>
+                <dt class="text-xs tracking-wide text-subtle uppercase">{stat.label}</dt>
+                <dd class="mt-2 font-display text-3xl font-bold tracking-tight text-ink">
+                  {stat.value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      )
+    }
+
+    <div class="shell py-14 lg:py-20">
+      <div class="grid gap-12 lg:grid-cols-[1.35fr_1fr] lg:gap-20">
+        <div>
+          <p class="prose-body text-lg">{data.summary}</p>
+
+          <div class="prose-body mt-8 space-y-5 text-[1.0625rem] [&_p]:m-0">
+            <Content />
+          </div>
+        </div>
+
+        {
+          data.highlights.length > 0 && (
+            <aside class="lg:border-l lg:border-line lg:pl-12">
+              <h2 class="eyebrow">What it involved</h2>
+              <ul class="mt-6 space-y-4">
+                {data.highlights.map((item) => (
+                  <li class="prose-body relative pl-6 text-[0.95rem]">
+                    <span
+                      class="absolute top-[0.7em] left-0 size-1.5 rounded-full bg-gold"
+                      aria-hidden="true"
+                    />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </aside>
+          )
+        }
+      </div>
+
+      <div class="mt-16 border-t border-line pt-8">
+        <ShareButtons title={`${data.name} — ${data.tagline}`} />
+      </div>
+    </div>
+  </article>
+</BaseLayout>

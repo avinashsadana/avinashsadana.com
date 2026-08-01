@@ -1,0 +1,166 @@
+---
+interface Props {
+  /** Text used as the share message. Falls back to the page title. */
+  title: string;
+  label?: string;
+}
+
+const { title, label = 'Share this' } = Astro.props;
+
+const url = new URL(Astro.url.pathname.replace(/\/+$/, '') || '/', Astro.site).href;
+const encodedUrl = encodeURIComponent(url);
+const encodedTitle = encodeURIComponent(title);
+
+/**
+ * Instagram has no web share URL — you cannot deep-link a share into it from a
+ * browser. On mobile the native share sheet surfaces Instagram (and WhatsApp,
+ * and Messenger) directly, so the "Share" button below uses `navigator.share`
+ * when it exists and falls back to these explicit links everywhere else.
+ */
+const targets = [
+  {
+    label: 'LinkedIn',
+    href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+    icon: 'M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9h4v12H3V9Zm7 0h3.8v1.7h.05a4.2 4.2 0 0 1 3.75-2c4 0 4.75 2.6 4.75 6V21h-4v-5.6c0-1.35-.03-3.1-1.9-3.1-1.9 0-2.2 1.48-2.2 3v5.7h-4V9Z',
+  },
+  {
+    label: 'WhatsApp',
+    href: `https://api.whatsapp.com/send?text=${encodedTitle}%20${encodedUrl}`,
+    icon: 'M12.04 2a9.9 9.9 0 0 0-8.5 14.92L2 22l5.23-1.5A9.9 9.9 0 1 0 12.04 2Zm0 1.8a8.1 8.1 0 1 1-4.13 15.06l-.3-.18-3.1.89.9-3.02-.2-.31A8.1 8.1 0 0 1 12.04 3.8Zm4.44 10.2c-.24-.12-1.42-.7-1.64-.78-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1.02-.38-1.94-1.2-.72-.64-1.2-1.42-1.34-1.66-.14-.24-.02-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.2-.47-.4-.4-.54-.41h-.46c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.7 2.6 4.12 3.64.58.25 1.03.4 1.38.51.58.19 1.1.16 1.52.1.46-.07 1.42-.58 1.62-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28Z',
+  },
+  {
+    label: 'Facebook',
+    href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+    icon: 'M13.5 21v-8h2.7l.4-3.1h-3.1V7.9c0-.9.25-1.5 1.55-1.5h1.65V3.63c-.29-.04-1.27-.13-2.41-.13-2.39 0-4.03 1.46-4.03 4.14V9.9H7.5V13h2.76v8h3.24Z',
+  },
+  {
+    label: 'X',
+    href: `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`,
+    icon: 'M17.53 3h3.05l-6.67 7.62L21.75 21h-6.13l-4.8-6.28L5.32 21H2.27l7.13-8.15L2.5 3h6.29l4.34 5.74L17.53 3Zm-1.07 16.17h1.69L7.62 4.74H5.8l10.66 14.43Z',
+  },
+] as const;
+---
+
+<div class="flex flex-wrap items-center gap-3" data-share data-share-title={title} data-share-url={url}>
+  <span class="mr-1 text-xs font-semibold tracking-[0.14em] text-subtle uppercase">{label}</span>
+
+  <!-- Native share sheet: the only route to Instagram, and the best UX on mobile.
+       Hidden until JS confirms navigator.share exists. -->
+  <button
+    type="button"
+    data-share-native
+    class="btn-primary px-4 py-2 text-xs"
+    hidden
+  >
+    <svg
+      class="size-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.9"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 3.5v11M12 3.5 8 7.5M12 3.5l4 4M5 13.5v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"></path>
+    </svg>
+    Share
+  </button>
+
+  {
+    targets.map((target) => (
+      <a
+        href={target.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="grid size-9 place-items-center rounded-full border border-line text-muted transition-colors hover:border-line-strong hover:text-ink"
+        aria-label={`Share on ${target.label}`}
+      >
+        <svg class="size-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d={target.icon} />
+        </svg>
+      </a>
+    ))
+  }
+
+  <button
+    type="button"
+    data-share-copy
+    class="inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 text-xs font-semibold text-muted transition-colors hover:border-line-strong hover:text-ink"
+  >
+    <span data-share-copy-label>Copy link</span>
+  </button>
+
+  <span class="sr-only" role="status" data-share-status></span>
+</div>
+
+<script>
+  function bindShare() {
+    const containers = document.querySelectorAll<HTMLElement>('[data-share]');
+
+    for (const container of containers) {
+      if (container.dataset.bound === 'true') continue;
+      container.dataset.bound = 'true';
+
+      const title = container.dataset.shareTitle ?? document.title;
+      const url = container.dataset.shareUrl ?? window.location.href;
+      const status = container.querySelector<HTMLElement>('[data-share-status]');
+
+      const announce = (message: string) => {
+        if (status) status.textContent = message;
+      };
+
+      // Native sheet — this is what puts Instagram, WhatsApp and Messenger in
+      // reach on a phone. Only revealed when the browser actually supports it.
+      const nativeButton = container.querySelector<HTMLButtonElement>('[data-share-native]');
+      if (nativeButton && typeof navigator.share === 'function') {
+        nativeButton.hidden = false;
+        nativeButton.addEventListener('click', async () => {
+          try {
+            await navigator.share({ title, text: title, url });
+          } catch {
+            // The user dismissed the sheet, or the browser refused. Neither is
+            // an error worth surfacing — the explicit links are right there.
+          }
+        });
+      }
+
+      const copyButton = container.querySelector<HTMLButtonElement>('[data-share-copy]');
+      const copyLabel = container.querySelector<HTMLElement>('[data-share-copy-label]');
+      copyButton?.addEventListener('click', async () => {
+        let copied = false;
+        try {
+          await navigator.clipboard.writeText(url);
+          copied = true;
+        } catch {
+          // Clipboard API needs a secure context and permission. Fall back to
+          // the legacy path so the button still does something useful.
+          const field = document.createElement('textarea');
+          field.value = url;
+          field.setAttribute('readonly', '');
+          field.style.position = 'fixed';
+          field.style.opacity = '0';
+          document.body.appendChild(field);
+          field.select();
+          try {
+            copied = document.execCommand('copy');
+          } catch {
+            copied = false;
+          }
+          field.remove();
+        }
+
+        if (copyLabel) {
+          copyLabel.textContent = copied ? 'Copied' : 'Press ⌘C';
+          window.setTimeout(() => {
+            copyLabel.textContent = 'Copy link';
+          }, 2000);
+        }
+        announce(copied ? 'Link copied to clipboard' : 'Copy the link manually');
+      });
+    }
+  }
+
+  bindShare();
+  document.addEventListener('astro:page-load', bindShare);
+</script>

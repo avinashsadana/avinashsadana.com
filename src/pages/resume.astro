@@ -1,0 +1,373 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import {
+  dateRange,
+  getAchievements,
+  getCapabilities,
+  getCertifications,
+  getEducation,
+  getExperience,
+  getPrograms,
+  getVentures,
+} from '../lib/content';
+import { site, socials } from '../site.config';
+
+const experience = await getExperience();
+const programs = await getPrograms();
+const ventures = await getVentures();
+const capabilities = await getCapabilities();
+const certifications = await getCertifications();
+const education = await getEducation();
+const achievements = await getAchievements();
+---
+
+<BaseLayout
+  title="Résumé"
+  description="The full résumé of Avinash Sadana — experience, education, capabilities, certifications and achievements."
+>
+  <div class="shell py-14 lg:py-20">
+    <!-- One <h1> serving both screen and paper. The print stylesheet resizes it
+         rather than a second heading being rendered — two h1s on a page is a
+         real accessibility and SEO fault, not a cosmetic one. -->
+    <div class="mb-12 flex flex-wrap items-end justify-between gap-6">
+      <div>
+        <p class="eyebrow print:hidden">Résumé</p>
+        <h1 class="mt-4 font-display text-hero font-bold text-ink print:mt-0 print:text-3xl">
+          Avinash Sadana
+        </h1>
+      </div>
+      <button
+        type="button"
+        data-print
+        class="btn-secondary print:hidden"
+      >
+        <svg
+          class="size-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M7 9V4h10v5M7 18H5.5A1.5 1.5 0 0 1 4 16.5v-5A1.5 1.5 0 0 1 5.5 10h13a1.5 1.5 0 0 1 1.5 1.5v5a1.5 1.5 0 0 1-1.5 1.5H17M7 14h10v6H7z"
+          ></path>
+        </svg>
+        Save as PDF
+      </button>
+    </div>
+
+    <article class="resume mx-auto max-w-3xl">
+      <p class="contact-line">
+        {site.email} · {site.location} ·{' '}
+        {socials.filter((s) => s.href.startsWith('http')).map((s) => s.handle).join(' · ')}
+      </p>
+
+      <section>
+        <h2>Professional summary</h2>
+        <p>
+          MBA candidate specialising in International Business, with hands-on experience in
+          procurement, strategic sourcing, supply chain and manufacturing operations within the
+          heavy engineering and food manufacturing sectors. Lean Six Sigma Green Belt certified.
+          Founder of two ventures still operating today, and a competitive ultra-distance
+          cyclist. Looking to contribute to a global organisation with a results-driven,
+          operationally focused approach across supply chain, operations, programme management
+          or general management.
+        </p>
+      </section>
+
+      {
+        programs.length > 0 && (
+          <section>
+            <h2>Project & programme management</h2>
+            {programs.map((entry) => (
+              <div class="entry">
+                <div class="entry-head">
+                  <h3>
+                    {entry.data.title} — {entry.data.org}
+                  </h3>
+                  <span>{dateRange(entry.data.start, entry.data.end, entry.data.current)}</span>
+                </div>
+                <p>{entry.data.summary}</p>
+                {entry.data.highlights.length > 0 && (
+                  <ul>
+                    {entry.data.highlights.map((item) => (
+                      <li>{item}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
+          </section>
+        )
+      }
+
+      <section>
+        <h2>Professional experience</h2>
+        {
+          experience.map((entry) => (
+            <div class="entry">
+              <div class="entry-head">
+                <h3>
+                  {entry.data.role} — {entry.data.org}
+                </h3>
+                <span>{dateRange(entry.data.start, entry.data.end, entry.data.current)}</span>
+              </div>
+              <p>{entry.data.summary}</p>
+              {entry.data.highlights.length > 0 && (
+                <ul>
+                  {entry.data.highlights.map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+              )}
+              {entry.data.projects.map((project) => (
+                <p class="project">
+                  <strong>Project: {project.title}</strong> — {project.detail}
+                </p>
+              ))}
+            </div>
+          ))
+        }
+      </section>
+
+      <section>
+        <h2>Leadership & entrepreneurial experience</h2>
+        {
+          ventures.map((venture) => (
+            <div class="entry">
+              <div class="entry-head">
+                <h3>
+                  {venture.data.role} — {venture.data.name}
+                </h3>
+                <span>
+                  {dateRange(venture.data.start, venture.data.end, venture.data.current)}
+                </span>
+              </div>
+              <p>{venture.data.summary}</p>
+              {venture.data.highlights.length > 0 && (
+                <ul>
+                  {venture.data.highlights.map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))
+        }
+      </section>
+
+      <section>
+        <h2>Core competencies</h2>
+        <p class="competencies">
+          {capabilities.flatMap((group) => group.data.items).join(' · ')}
+        </p>
+      </section>
+
+      <section>
+        <h2>Education</h2>
+        {
+          education.map((entry) => (
+            <div class="entry">
+              <div class="entry-head">
+                <h3>
+                  {entry.data.degree}
+                  {entry.data.field && ` — ${entry.data.field}`}
+                </h3>
+                <span>
+                  {entry.data.start} – {entry.data.end}
+                </span>
+              </div>
+              <p>
+                {entry.data.institution}
+                {entry.data.location && `, ${entry.data.location}`}
+                {entry.data.note && ` — ${entry.data.note}`}
+              </p>
+            </div>
+          ))
+        }
+      </section>
+
+      <section>
+        <h2>Certifications</h2>
+        <ul>
+          {
+            certifications.map((cert) => (
+              <li>
+                {cert.data.name} — {cert.data.issuer}
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      <section>
+        <h2>Achievements & recognition</h2>
+        <ul>
+          {
+            achievements.map((item) => (
+              <li>
+                {item.data.title}
+                {item.data.year && ` (${item.data.year})`}
+                {item.data.detail && ` — ${item.data.detail}`}
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+    </article>
+  </div>
+</BaseLayout>
+
+<script>
+  function bindPrint() {
+    const button = document.querySelector<HTMLButtonElement>('[data-print]');
+    if (!button || button.dataset.bound === 'true') return;
+    button.dataset.bound = 'true';
+    // The browser's own print dialog offers "Save as PDF" on every platform,
+    // which beats shipping a separate PDF that drifts out of date.
+    button.addEventListener('click', () => window.print());
+  }
+
+  bindPrint();
+  document.addEventListener('astro:page-load', bindPrint);
+</script>
+
+<style>
+  .resume {
+    color: var(--c-text-muted);
+    font-size: 0.95rem;
+    line-height: 1.65;
+  }
+
+  .contact-line {
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--c-border);
+    color: var(--c-text-muted);
+    font-size: 0.875rem;
+  }
+
+  .resume section {
+    margin-top: 2.25rem;
+  }
+
+  .resume h2 {
+    margin-bottom: 1.1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--c-border);
+    color: var(--c-text);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .resume h3 {
+    color: var(--c-text);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .entry {
+    margin-top: 1.35rem;
+  }
+
+  .entry:first-of-type {
+    margin-top: 0;
+  }
+
+  .entry-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem 1.5rem;
+  }
+
+  .entry-head span {
+    color: var(--c-text-subtle);
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .resume p {
+    margin-top: 0.5rem;
+  }
+
+  .resume ul {
+    margin-top: 0.6rem;
+    padding-inline-start: 1.15rem;
+    list-style: disc;
+  }
+
+  .resume li {
+    margin-top: 0.35rem;
+  }
+
+  .resume li::marker {
+    color: var(--c-accent);
+  }
+
+  .project {
+    margin-top: 0.7rem;
+    font-size: 0.9rem;
+  }
+
+  .project strong {
+    color: var(--c-text);
+  }
+
+  .competencies {
+    font-size: 0.9rem;
+  }
+
+  /* Printing: black on white, no site chrome, sensible page breaks. */
+  @media print {
+    .resume {
+      max-width: none;
+      color: #000;
+      font-size: 10.5pt;
+      line-height: 1.45;
+    }
+
+    .resume h2,
+    .resume h3,
+    .project strong {
+      color: #000;
+    }
+
+    .entry-head span {
+      color: #444;
+    }
+
+    .resume section {
+      margin-top: 1.4rem;
+      break-inside: avoid;
+    }
+
+    .entry {
+      break-inside: avoid;
+    }
+  }
+</style>
+
+<style is:global>
+  @media print {
+    header,
+    footer,
+    .print\:hidden {
+      display: none !important;
+    }
+
+    body {
+      background: #fff !important;
+    }
+
+    @page {
+      margin: 14mm;
+    }
+  }
+</style>

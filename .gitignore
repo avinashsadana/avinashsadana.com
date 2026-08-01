@@ -33,3 +33,4 @@ playwright/.cache/
 
 # source documents (contains personal contact details not shown on the site)
 private/
+.env*

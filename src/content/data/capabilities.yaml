@@ -1,0 +1,66 @@
+# Grouped capabilities shown on /work.
+# Add, remove or reorder freely — `order` controls the sequence on the page.
+
+- id: supply-chain
+  group: Supply Chain & Procurement
+  blurb: >-
+    Sourcing, supplier development and the Procure-to-Pay cycle, learned inside
+    heavy engineering where delays are expensive and visible.
+  order: 1
+  items:
+    - Supply Chain Management
+    - Procurement & Strategic Sourcing
+    - Supplier Development
+    - Cost Negotiation
+    - Procure-to-Pay (P2P) Optimisation
+
+- id: operations
+  group: Operations & Manufacturing
+  blurb: >-
+    Time on a real production floor, plus process improvement methodology
+    formalised through Lean Six Sigma.
+  order: 2
+  items:
+    - Manufacturing Operations
+    - Production Planning
+    - Quality Control
+    - Lean Six Sigma (Green Belt)
+    - Process Improvement
+
+- id: program-management
+  group: Project & Programme Management
+  blurb: >-
+    Running work end to end — scoping, sequencing, and keeping the people
+    involved aligned long enough to finish.
+  order: 3
+  items:
+    - Project Management
+    - Programme Delivery
+    - Strategic Planning
+    - Stakeholder Management
+    - Cross-Functional Collaboration
+
+- id: business
+  group: Business & Market Strategy
+  blurb: >-
+    Market research that ends in a recommendation rather than a slide deck.
+  order: 4
+  items:
+    - Business Analysis
+    - Market Assessment & Research
+    - Business Development
+    - International Market Entry
+    - Competitive Analysis
+
+- id: leadership
+  group: Leadership & Communication
+  blurb: >-
+    Built by founding things, running events, and speaking in front of rooms
+    that were not obliged to listen.
+  order: 5
+  items:
+    - Leadership
+    - Public Speaking
+    - Storytelling
+    - Team Building & Recruitment
+    - Mentorship

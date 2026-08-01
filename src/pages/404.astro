@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { nav } from '../site.config';
+---
+
+<BaseLayout title="Page not found" description="That page doesn’t exist." noindex>
+  <div class="shell flex min-h-[60vh] flex-col justify-center py-20">
+    <p class="eyebrow">Error 404</p>
+    <h1 class="mt-5 font-display text-hero font-bold text-ink">
+      This route doesn’t exist.
+    </h1>
+    <p class="prose-body mt-5 text-lg">
+      Wrong turn. It happens on rides too — here’s the way back.
+    </p>
+
+    <ul class="mt-10 flex flex-wrap gap-3">
+      <li>
+        <a
+          href="/"
+          class="btn-primary"
+        >
+          Home
+        </a>
+      </li>
+      {
+        nav.map((item) => (
+          <li>
+            <a
+              href={item.href}
+              class="inline-flex rounded-full border border-line px-6 py-3 text-sm font-semibold text-ink transition-colors hover:border-line-strong hover:bg-bg-sunken"
+            >
+              {item.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</BaseLayout>

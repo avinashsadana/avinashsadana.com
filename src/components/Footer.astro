@@ -1,0 +1,83 @@
+---
+import { footerNav, nav, site, socials } from '../site.config';
+import ViewCounter from './ViewCounter.astro';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="mt-28 border-t border-line bg-bg-sunken">
+  <div class="shell py-16 lg:py-20">
+    <div class="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr]">
+      <div>
+        <p class="font-display text-section leading-none font-bold tracking-tight text-ink">
+          Let’s talk.
+        </p>
+        <p class="prose-body mt-4 max-w-sm">
+          Open to conversations about supply chain, operations and programme roles — and
+          always up for talking about bikes.
+        </p>
+        <a
+          href="/contact"
+          class="btn-primary mt-6"
+        >
+          Get in touch
+          <svg
+            class="size-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M5 12h13M12 5.5 18.5 12 12 18.5"></path>
+          </svg>
+        </a>
+      </div>
+
+      <nav aria-label="Footer">
+        <h2 class="eyebrow">Pages</h2>
+        <ul class="mt-5 space-y-2.5">
+          {
+            [...nav, ...footerNav].map((item) => (
+              <li>
+                <a href={item.href} class="link-underline text-sm text-muted hover:text-ink">
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div>
+        <h2 class="eyebrow">Elsewhere</h2>
+        <ul class="mt-5 space-y-2.5">
+          {
+            socials.map((item) => (
+              <li>
+                <a
+                  href={item.href}
+                  class="link-underline text-sm break-words text-muted hover:text-ink"
+                  {...item.href.startsWith('http')
+                    ? { target: '_blank', rel: 'noopener noreferrer' }
+                    : {}}
+                >
+                  {item.handle}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+
+    <div
+      class="mt-14 flex flex-col gap-3 border-t border-line pt-6 text-xs text-subtle sm:flex-row sm:items-center sm:justify-between"
+    >
+      <p>© {year} {site.name}. Based in {site.location}.</p>
+      <ViewCounter />
+    </div>
+  </div>
+</footer>

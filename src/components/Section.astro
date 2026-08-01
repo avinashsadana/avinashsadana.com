@@ -1,0 +1,47 @@
+---
+interface Props {
+  eyebrow?: string;
+  title?: string;
+  lead?: string;
+  id?: string;
+  /** Adds a hairline rule above the section. */
+  divider?: boolean;
+  class?: string;
+}
+
+const { eyebrow, title, lead, id, divider = false, class: className } = Astro.props;
+---
+
+<section
+  id={id}
+  class:list={[
+    'shell scroll-mt-24 py-14 lg:py-20',
+    divider && 'border-t border-line',
+    className,
+  ]}
+>
+  {
+    (eyebrow || title || lead) && (
+      <header class="max-w-3xl">
+        {eyebrow && <p class="eyebrow reveal">{eyebrow}</p>}
+        {title && (
+          <h2
+            class="reveal mt-4 font-display text-section font-bold text-ink"
+            style="--reveal-delay: 60ms"
+          >
+            {title}
+          </h2>
+        )}
+        {lead && (
+          <p class="prose-body reveal mt-5" style="--reveal-delay: 100ms">
+            {lead}
+          </p>
+        )}
+      </header>
+    )
+  }
+
+  <div class:list={[(eyebrow || title || lead) && 'mt-10 lg:mt-12']}>
+    <slot />
+  </div>
+</section>

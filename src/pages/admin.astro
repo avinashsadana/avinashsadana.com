@@ -1,0 +1,381 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { isAdminConfigured, isSignedIn } from '../lib/admin';
+import { getSupabase, isSupabaseConfigured } from '../lib/supabase';
+
+export const prerender = false;
+
+const configured = isAdminConfigured() && isSupabaseConfigured();
+const signedIn = configured && isSignedIn(Astro.cookies);
+
+interface Message {
+  id: string;
+  name: string;
+  email: string;
+  subject: string | null;
+  message: string;
+  status: string;
+  created_at: string;
+}
+
+interface Entry {
+  id: string;
+  name: string;
+  role: string | null;
+  message: string;
+  approved: boolean;
+  created_at: string;
+}
+
+let messages: Message[] = [];
+let entries: Entry[] = [];
+
+if (signedIn) {
+  const supabase = getSupabase();
+  const [messageResult, entryResult] = await Promise.all([
+    supabase
+      .from('contact_messages')
+      .select('id, name, email, subject, message, status, created_at')
+      .neq('status', 'archived')
+      .order('created_at', { ascending: false })
+      .limit(200),
+    supabase
+      .from('guestbook_entries')
+      .select('id, name, role, message, approved, created_at')
+      .order('created_at', { ascending: false })
+      .limit(200),
+  ]);
+
+  messages = (messageResult.data ?? []) as Message[];
+  entries = (entryResult.data ?? []) as Entry[];
+}
+
+const pending = entries.filter((entry) => !entry.approved);
+const published = entries.filter((entry) => entry.approved);
+
+const when = (value: string) =>
+  new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(value));
+---
+
+<BaseLayout title="Admin" description="Private." noindex>
+  <div class="shell py-16 lg:py-20">
+    {
+      !configured ? (
+        <div class="mx-auto max-w-lg rounded-2xl border border-line bg-bg-raised p-8">
+          <h1 class="font-display text-2xl font-bold tracking-tight text-ink">Not configured</h1>
+          <p class="prose-body mt-3 text-[0.95rem]">
+            Set an <code class="rounded bg-bg-sunken px-1.5 py-0.5">ADMIN_PASSWORD</code>{' '}
+            environment variable in the Vercel project, then redeploy. Until then this page
+            stays closed.
+          </p>
+        </div>
+      ) : !signedIn ? (
+        <div class="mx-auto max-w-sm">
+          <h1 class="font-display text-3xl font-bold tracking-tight text-ink">Admin</h1>
+          <p class="prose-body mt-3 text-[0.95rem]">Messages and guestbook moderation.</p>
+
+          <form id="login-form" class="mt-8 space-y-4" novalidate>
+            <div>
+              <label for="password" class="block text-sm font-semibold text-ink">
+                Password
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autocomplete="current-password"
+                required
+                class="mt-2 w-full rounded-xl border border-line bg-bg px-4 py-3 text-[0.95rem] text-ink transition-colors focus:border-accent focus:outline-none"
+              />
+            </div>
+
+            <button
+              type="submit"
+              class="btn-primary w-full"
+              data-submit
+            >
+              Sign in
+            </button>
+
+            <p class="text-sm font-medium text-accent" role="alert" data-login-error hidden />
+          </form>
+        </div>
+      ) : (
+        <div>
+          <div class="flex flex-wrap items-baseline justify-between gap-4">
+            <h1 class="font-display text-3xl font-bold tracking-tight text-ink lg:text-4xl">
+              Admin
+            </h1>
+            <button
+              type="button"
+              data-signout
+              class="rounded-full border border-line px-5 py-2 text-sm font-medium text-muted transition-colors hover:border-line-strong hover:text-ink"
+            >
+              Sign out
+            </button>
+          </div>
+
+          {/* Guestbook moderation — pending first, because that is the work. */}
+          <section class="mt-14">
+            <h2 class="eyebrow">Guestbook · awaiting review ({pending.length})</h2>
+
+            {pending.length === 0 ? (
+              <p class="prose-body mt-5 text-[0.95rem]">Nothing waiting. All caught up.</p>
+            ) : (
+              <ul class="mt-6 space-y-4">
+                {pending.map((entry) => (
+                  <li
+                    class="rounded-2xl border border-accent/40 bg-bg-raised p-6"
+                    data-row={entry.id}
+                  >
+                    <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                      <p class="font-semibold text-ink">
+                        {entry.name}
+                        {entry.role && <span class="font-normal text-muted"> · {entry.role}</span>}
+                      </p>
+                      <time class="text-xs text-subtle">{when(entry.created_at)}</time>
+                    </div>
+                    <p class="prose-body mt-3 text-[0.95rem] whitespace-pre-line">
+                      {entry.message}
+                    </p>
+                    <div class="mt-5 flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        class="btn-primary px-5 py-2 text-xs"
+                        data-action="approve"
+                        data-id={entry.id}
+                      >
+                        Publish
+                      </button>
+                      <button
+                        type="button"
+                        class="rounded-full border border-line px-5 py-2 text-xs font-semibold text-muted transition-colors hover:border-line-strong hover:text-ink"
+                        data-action="delete-entry"
+                        data-id={entry.id}
+                        data-confirm="Delete this note permanently?"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section class="mt-16">
+            <h2 class="eyebrow">Guestbook · published ({published.length})</h2>
+            {published.length === 0 ? (
+              <p class="prose-body mt-5 text-[0.95rem]">Nothing published yet.</p>
+            ) : (
+              <ul class="mt-6 space-y-3">
+                {published.map((entry) => (
+                  <li
+                    class="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-line bg-bg-raised px-5 py-4"
+                    data-row={entry.id}
+                  >
+                    <div class="min-w-0">
+                      <p class="text-sm font-semibold text-ink">{entry.name}</p>
+                      <p class="truncate text-sm text-muted">{entry.message}</p>
+                    </div>
+                    <button
+                      type="button"
+                      class="shrink-0 rounded-full border border-line px-4 py-1.5 text-xs font-semibold text-muted transition-colors hover:border-line-strong hover:text-ink"
+                      data-action="unapprove"
+                      data-id={entry.id}
+                    >
+                      Hide
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section class="mt-16">
+            <h2 class="eyebrow">Messages ({messages.length})</h2>
+
+            {messages.length === 0 ? (
+              <p class="prose-body mt-5 text-[0.95rem]">No messages yet.</p>
+            ) : (
+              <ul class="mt-6 space-y-4">
+                {messages.map((message) => (
+                  <li
+                    class:list={[
+                      'rounded-2xl border bg-bg-raised p-6',
+                      message.status === 'new' ? 'border-accent/40' : 'border-line',
+                    ]}
+                    data-row={message.id}
+                  >
+                    <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                      <p class="font-semibold text-ink">
+                        {message.name}
+                        {message.status === 'new' && (
+                          <span class="ml-2 rounded-full bg-accent-soft px-2.5 py-0.5 text-xs font-semibold text-accent">
+                            New
+                          </span>
+                        )}
+                      </p>
+                      <time class="text-xs text-subtle">{when(message.created_at)}</time>
+                    </div>
+
+                    <a
+                      href={`mailto:${message.email}`}
+                      class="link-underline mt-1 inline-block text-sm text-muted"
+                    >
+                      {message.email}
+                    </a>
+
+                    {message.subject && (
+                      <p class="mt-3 text-sm font-medium text-ink">{message.subject}</p>
+                    )}
+
+                    <p class="prose-body mt-3 text-[0.95rem] whitespace-pre-line">
+                      {message.message}
+                    </p>
+
+                    <div class="mt-5 flex flex-wrap gap-3">
+                      <a
+                        href={`mailto:${message.email}?subject=${encodeURIComponent(`Re: ${message.subject || 'your message'}`)}`}
+                        class="btn-primary px-5 py-2 text-xs"
+                      >
+                        Reply
+                      </a>
+                      {message.status === 'new' && (
+                        <button
+                          type="button"
+                          class="rounded-full border border-line px-5 py-2 text-xs font-semibold text-muted transition-colors hover:border-line-strong hover:text-ink"
+                          data-action="mark-read"
+                          data-id={message.id}
+                          data-keep
+                        >
+                          Mark read
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        class="rounded-full border border-line px-5 py-2 text-xs font-semibold text-muted transition-colors hover:border-line-strong hover:text-ink"
+                        data-action="archive"
+                        data-id={message.id}
+                      >
+                        Archive
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </div>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<script>
+  function bindAdmin() {
+    const loginForm = document.getElementById('login-form') as HTMLFormElement | null;
+    if (loginForm && loginForm.dataset.bound !== 'true') {
+      loginForm.dataset.bound = 'true';
+      const error = loginForm.querySelector<HTMLElement>('[data-login-error]');
+      const button = loginForm.querySelector<HTMLButtonElement>('[data-submit]');
+
+      loginForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (error) error.hidden = true;
+        if (button) {
+          button.disabled = true;
+          button.textContent = 'Checking…';
+        }
+
+        const password = String(new FormData(loginForm).get('password') ?? '');
+
+        try {
+          const response = await fetch('/api/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password }),
+          });
+
+          if (response.ok) {
+            window.location.reload();
+            return;
+          }
+
+          const result = (await response.json().catch(() => ({}))) as { error?: string };
+          if (error) {
+            error.textContent = result.error ?? 'Sign in failed.';
+            error.hidden = false;
+          }
+        } catch {
+          if (error) {
+            error.textContent = 'Couldn’t reach the server.';
+            error.hidden = false;
+          }
+        } finally {
+          if (button) {
+            button.disabled = false;
+            button.textContent = 'Sign in';
+          }
+        }
+      });
+    }
+
+    const signOut = document.querySelector<HTMLButtonElement>('[data-signout]');
+    if (signOut && signOut.dataset.bound !== 'true') {
+      signOut.dataset.bound = 'true';
+      signOut.addEventListener('click', async () => {
+        await fetch('/api/admin/login', { method: 'DELETE' });
+        window.location.reload();
+      });
+    }
+
+    document.querySelectorAll<HTMLButtonElement>('[data-action]').forEach((button) => {
+      if (button.dataset.bound === 'true') return;
+      button.dataset.bound = 'true';
+
+      button.addEventListener('click', async () => {
+        const confirmMessage = button.dataset.confirm;
+        if (confirmMessage && !window.confirm(confirmMessage)) return;
+
+        const original = button.textContent;
+        button.disabled = true;
+        button.textContent = 'Working…';
+
+        try {
+          const response = await fetch('/api/admin/moderate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: button.dataset.id, action: button.dataset.action }),
+          });
+
+          if (!response.ok) throw new Error('request failed');
+
+          // `data-keep` marks actions that change state without removing the
+          // row from this view (marking a message read, for example).
+          if (button.hasAttribute('data-keep')) {
+            button.remove();
+            return;
+          }
+
+          document.querySelector(`[data-row="${button.dataset.id}"]`)?.remove();
+        } catch {
+          button.textContent = 'Failed — retry';
+          button.disabled = false;
+          window.setTimeout(() => {
+            button.textContent = original;
+          }, 2500);
+        }
+      });
+    });
+  }
+
+  bindAdmin();
+  document.addEventListener('astro:page-load', bindAdmin);
+</script>

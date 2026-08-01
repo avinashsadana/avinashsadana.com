@@ -1,0 +1,28 @@
+---
+interface Props {
+  eyebrow: string;
+  title: string;
+  lead?: string;
+}
+
+const { eyebrow, title, lead } = Astro.props;
+---
+
+<!-- Bottom padding is deliberately small: the following <Section> supplies the
+     gap, and doubling both left an awkward void under every page title. -->
+<section class="shell pt-16 pb-2 lg:pt-24 lg:pb-4">
+  <p class="eyebrow reveal">{eyebrow}</p>
+  <h1
+    class="reveal mt-5 font-display text-hero font-bold text-ink"
+    style="--reveal-delay: 60ms"
+  >
+    {title}
+  </h1>
+  {
+    lead && (
+      <p class="prose-body reveal mt-6 text-lg" style="--reveal-delay: 120ms">
+        {lead}
+      </p>
+    )
+  }
+</section>

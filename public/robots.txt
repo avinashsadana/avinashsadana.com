@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Private — nothing here for a search engine.
+Disallow: /admin
+Disallow: /api/
+
+Sitemap: https://avinashsadana.com/sitemap-index.xml

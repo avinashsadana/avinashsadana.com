@@ -1,0 +1,65 @@
+---
+interface Props {
+  name: string;
+  label: string;
+  type?: 'text' | 'email' | 'textarea';
+  required?: boolean;
+  placeholder?: string;
+  hint?: string;
+  rows?: number;
+  maxlength?: number;
+  autocomplete?: string;
+}
+
+const {
+  name,
+  label,
+  type = 'text',
+  required = false,
+  placeholder,
+  hint,
+  rows = 6,
+  maxlength,
+  autocomplete,
+} = Astro.props;
+
+const fieldClass =
+  'w-full rounded-xl border border-line bg-bg px-4 py-3 text-[0.95rem] text-ink placeholder:text-subtle transition-colors focus:border-accent focus:outline-none aria-[invalid=true]:border-accent';
+---
+
+<div>
+  <label for={name} class="block text-sm font-semibold text-ink">
+    {label}
+    {!required && <span class="ml-1.5 font-normal text-subtle">(optional)</span>}
+  </label>
+  {hint && <p class="mt-1 text-xs text-subtle">{hint}</p>}
+
+  {
+    type === 'textarea' ? (
+      <textarea
+        id={name}
+        name={name}
+        rows={rows}
+        required={required}
+        maxlength={maxlength}
+        placeholder={placeholder}
+        class:list={[fieldClass, 'mt-2 resize-y']}
+        aria-describedby={`${name}-error`}
+      />
+    ) : (
+      <input
+        id={name}
+        name={name}
+        type={type}
+        required={required}
+        maxlength={maxlength}
+        placeholder={placeholder}
+        autocomplete={autocomplete}
+        class:list={[fieldClass, 'mt-2']}
+        aria-describedby={`${name}-error`}
+      />
+    )
+  }
+
+  <p id={`${name}-error`} class="mt-1.5 text-xs font-medium text-accent" data-field-error hidden></p>
+</div>

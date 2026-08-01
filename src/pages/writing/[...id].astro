@@ -1,0 +1,185 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { render } from 'astro:content';
+import ShareButtons from '../../components/ShareButtons.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate, getPosts, isoDate, readingTime } from '../../lib/content';
+import { site } from '../../site.config';
+
+export const getStaticPaths = (async () => {
+  const posts = await getPosts();
+  return posts.map((post) => ({
+    params: { id: post.id },
+    props: { post },
+  }));
+}) satisfies GetStaticPaths;
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const { data } = post;
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: data.title,
+  description: data.description,
+  datePublished: data.pubDate.toISOString(),
+  ...(data.updatedDate ? { dateModified: data.updatedDate.toISOString() } : {}),
+  author: { '@id': `${site.url}/#person` },
+  publisher: { '@id': `${site.url}/#person` },
+  keywords: data.tags.join(', '),
+  mainEntityOfPage: new URL(Astro.url.pathname, Astro.site).href,
+};
+---
+
+<BaseLayout
+  title={data.title}
+  description={data.description}
+  type="article"
+  publishedTime={data.pubDate}
+  modifiedTime={data.updatedDate}
+  tags={data.tags}
+  schema={schema}
+>
+  <article class="shell py-14 lg:py-20">
+    <a href="/writing" class="link-underline text-sm font-medium text-muted hover:text-ink">
+      ← All writing
+    </a>
+
+    <header class="mt-8 max-w-3xl">
+      <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-medium text-subtle">
+        <time datetime={isoDate(data.pubDate)}>{formatDate(data.pubDate)}</time>
+        <span aria-hidden="true">·</span>
+        <span>{readingTime(post.body)}</span>
+      </div>
+
+      <h1 class="mt-5 font-display text-hero font-bold text-ink">{data.title}</h1>
+      <p class="prose-body mt-6 text-lg">{data.description}</p>
+
+      {
+        data.tags.length > 0 && (
+          <ul class="mt-7 flex flex-wrap gap-2">
+            {data.tags.map((tag) => (
+              <li class="rounded-full border border-line px-3 py-1 text-xs font-medium text-muted">
+                {tag}
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </header>
+
+    <div class="post-body mt-12 max-w-2xl">
+      <Content />
+    </div>
+
+    <div class="mt-14 max-w-2xl border-t border-line pt-8">
+      <ShareButtons title={data.title} />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  /* Article typography. Scoped here so it never leaks into the rest of the site. */
+  .post-body {
+    color: var(--c-text-muted);
+    font-size: 1.0625rem;
+    line-height: 1.75;
+  }
+
+  .post-body :global(p),
+  .post-body :global(ul),
+  .post-body :global(ol),
+  .post-body :global(blockquote) {
+    margin-block: 1.35em;
+  }
+
+  .post-body :global(h2) {
+    margin-block: 2.4em 0.7em;
+    color: var(--c-text);
+    font-size: 1.6rem;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+  }
+
+  .post-body :global(h3) {
+    margin-block: 1.9em 0.6em;
+    color: var(--c-text);
+    font-size: 1.25rem;
+    letter-spacing: -0.02em;
+  }
+
+  .post-body :global(strong) {
+    color: var(--c-text);
+    font-weight: 600;
+  }
+
+  .post-body :global(a) {
+    color: var(--c-text);
+    text-decoration: underline;
+    text-decoration-color: var(--c-accent);
+    text-underline-offset: 3px;
+  }
+
+  .post-body :global(ul),
+  .post-body :global(ol) {
+    padding-inline-start: 1.4em;
+  }
+
+  .post-body :global(ul) {
+    list-style: disc;
+  }
+
+  .post-body :global(ol) {
+    list-style: decimal;
+  }
+
+  .post-body :global(li) {
+    margin-block: 0.5em;
+  }
+
+  .post-body :global(li::marker) {
+    color: var(--c-accent);
+  }
+
+  .post-body :global(blockquote) {
+    border-inline-start: 2px solid var(--c-accent);
+    padding-inline-start: 1.4em;
+    font-style: italic;
+  }
+
+  .post-body :global(hr) {
+    margin-block: 3em;
+    border: 0;
+    border-top: 1px solid var(--c-border);
+  }
+
+  .post-body :global(code) {
+    background-color: var(--c-bg-sunken);
+    border-radius: 4px;
+    padding: 0.15em 0.4em;
+    font-size: 0.9em;
+  }
+
+  .post-body :global(pre) {
+    margin-block: 1.6em;
+    overflow-x: auto;
+    border-radius: 12px;
+    padding: 1.15rem 1.35rem;
+  }
+
+  .post-body :global(pre code) {
+    background: none;
+    padding: 0;
+  }
+
+  .post-body :global(img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+  }
+
+  .post-body :global(em) {
+    font-style: italic;
+  }
+</style>
