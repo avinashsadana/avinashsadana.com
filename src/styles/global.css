@@ -1,0 +1,232 @@
+@import '@fontsource-variable/bricolage-grotesque';
+@import '@fontsource-variable/inter';
+@import 'tailwindcss';
+
+/* Theme is driven by a `.dark` class on <html>, set by an inline pre-paint
+   script in BaseLayout so there is never a flash of the wrong theme. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------------------
+   Semantic tokens. Defined as plain CSS variables so they can flip at runtime,
+   then exposed to Tailwind via `@theme inline` (which keeps the var reference
+   instead of inlining the value at build time).
+   --------------------------------------------------------------------------- */
+:root {
+  color-scheme: light;
+
+  --c-bg: oklch(98.4% 0.006 85);
+  --c-bg-raised: oklch(100% 0 0);
+  --c-bg-sunken: oklch(95.6% 0.008 85);
+  --c-text: oklch(19% 0.01 60);
+  --c-text-muted: oklch(48% 0.012 60);
+  --c-text-subtle: oklch(62% 0.01 60);
+  --c-border: oklch(88% 0.008 70);
+  --c-border-strong: oklch(19% 0.01 60);
+  --c-accent: oklch(57% 0.185 38);
+  --c-accent-hover: oklch(50% 0.19 38);
+  --c-accent-contrast: oklch(99% 0 0);
+  --c-accent-soft: oklch(94% 0.035 45);
+}
+
+.dark {
+  color-scheme: dark;
+
+  --c-bg: oklch(15.5% 0.008 70);
+  --c-bg-raised: oklch(20% 0.009 70);
+  --c-bg-sunken: oklch(12% 0.007 70);
+  --c-text: oklch(96% 0.006 85);
+  --c-text-muted: oklch(72% 0.012 75);
+  --c-text-subtle: oklch(58% 0.012 75);
+  --c-border: oklch(29% 0.01 70);
+  --c-border-strong: oklch(96% 0.006 85);
+  --c-accent: oklch(72% 0.165 45);
+  --c-accent-hover: oklch(78% 0.15 45);
+  --c-accent-contrast: oklch(15.5% 0.008 70);
+  --c-accent-soft: oklch(27% 0.05 45);
+}
+
+@theme inline {
+  --color-bg: var(--c-bg);
+  --color-bg-raised: var(--c-bg-raised);
+  --color-bg-sunken: var(--c-bg-sunken);
+  --color-ink: var(--c-text);
+  --color-muted: var(--c-text-muted);
+  --color-subtle: var(--c-text-subtle);
+  --color-line: var(--c-border);
+  --color-line-strong: var(--c-border-strong);
+  --color-accent: var(--c-accent);
+  --color-accent-hover: var(--c-accent-hover);
+  --color-accent-contrast: var(--c-accent-contrast);
+  --color-accent-soft: var(--c-accent-soft);
+
+  --font-display: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+
+  --text-display: clamp(3rem, 12vw, 9.5rem);
+  --text-display--line-height: 0.86;
+  --text-display--letter-spacing: -0.045em;
+  --text-display--font-weight: 700;
+
+  --text-hero: clamp(2.25rem, 6.5vw, 4.75rem);
+  --text-hero--line-height: 0.98;
+  --text-hero--letter-spacing: -0.035em;
+
+  --text-section: clamp(1.85rem, 4.2vw, 3rem);
+  --text-section--line-height: 1.02;
+  --text-section--letter-spacing: -0.03em;
+}
+
+/* ---------------------------------------------------------------------------
+   Base
+   --------------------------------------------------------------------------- */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    scrollbar-gutter: stable;
+  }
+
+  body {
+    background-color: var(--c-bg);
+    color: var(--c-text);
+    font-family: var(--font-sans);
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background-color: var(--c-accent);
+    color: var(--c-accent-contrast);
+  }
+
+  /* A visible, high-contrast focus ring everywhere — keyboard users should
+     never have to guess where they are. */
+  :focus-visible {
+    outline: 2px solid var(--c-accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* Fonts are self-hosted; swap avoids invisible text while they load. */
+  @font-face {
+    font-family: 'Bricolage Grotesque Variable';
+    font-display: swap;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Components
+   --------------------------------------------------------------------------- */
+@layer components {
+  .shell {
+    width: 100%;
+    max-width: 78rem;
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+  }
+
+  @media (min-width: 1024px) {
+    .shell {
+      padding-inline: 3rem;
+    }
+  }
+
+  /* Small uppercase label used to head every section. */
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--c-text-subtle);
+  }
+
+  .eyebrow::before {
+    content: '';
+    width: 1.75rem;
+    height: 1px;
+    background-color: var(--c-accent);
+  }
+
+  .link-underline {
+    background-image: linear-gradient(var(--c-accent), var(--c-accent));
+    background-size: 0% 1.5px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .link-underline:hover,
+  .link-underline:focus-visible {
+    background-size: 100% 1.5px;
+  }
+
+  .prose-body {
+    max-width: 68ch;
+    font-size: 1.0625rem;
+    line-height: 1.75;
+    color: var(--c-text-muted);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Motion — every animation below is disabled under prefers-reduced-motion.
+   --------------------------------------------------------------------------- */
+@layer utilities {
+  .reveal {
+    opacity: 0;
+    transform: translateY(1.75rem);
+    transition:
+      opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* If JS never runs (or fails), content must still be readable. */
+  .no-js .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
