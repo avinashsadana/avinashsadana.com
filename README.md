@@ -103,6 +103,11 @@ are always readable at `/admin`. Email is a convenience layer on top:
 - **With a key** — a notification is also emailed. If Resend fails, the message
   is still saved and the sender still sees success.
 
+Currently configured: `avinashsadana.com` is a verified Resend sending domain
+(ap-northeast-1), mail goes from `notifications@avinashsadana.com` to
+`avinashsadana12@gmail.com`, and the API key is scoped to **sending access on
+that domain only** — it cannot read, list or manage anything.
+
 Resend's free tier (3,000 emails/month) is available directly at
 [resend.com](https://resend.com); the Vercel Marketplace listing starts at
 $20/month, which this site does not need.
