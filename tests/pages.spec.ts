@@ -80,7 +80,7 @@ test('pages declare canonical URLs and Open Graph images', async ({ page }) => {
   );
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
     'content',
-    'https://avinashsadana.com/og.png',
+    'https://avinashsadana.com/og.jpg',
   );
 });
 

@@ -47,7 +47,7 @@ for (const page of expectedPages) {
 }
 
 // --- SEO artefacts -----------------------------------------------------------
-for (const asset of ['sitemap-index.xml', 'robots.txt', 'rss.xml', 'og.png', 'favicon.svg']) {
+for (const asset of ['sitemap-index.xml', 'robots.txt', 'rss.xml', 'og.jpg', 'avinash-sadana.jpg', 'favicon.svg']) {
   if (has(asset)) ok(`emitted ${asset}`);
   else fail(`missing asset: ${asset}`);
 }

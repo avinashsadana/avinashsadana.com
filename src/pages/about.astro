@@ -1,10 +1,12 @@
 ---
+import { Image } from 'astro:assets';
 import ArrowLink from '../components/ArrowLink.astro';
 import PageHeader from '../components/PageHeader.astro';
 import Section from '../components/Section.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getAchievements, getCertifications, getEducation } from '../lib/content';
 import { socials } from '../site.config';
+import portrait from '../assets/avinash-sadana.jpg';
 
 const education = await getEducation();
 const certifications = await getCertifications();
@@ -68,6 +70,14 @@ const categories = [
       </div>
 
       <aside class="reveal space-y-10" style="--reveal-delay: 100ms">
+        <Image
+          src={portrait}
+          alt="Avinash Sadana"
+          width={760}
+          densities={[1, 2]}
+          class="aspect-square w-full max-w-sm rounded-2xl object-cover"
+        />
+
         <div>
           <h2 class="eyebrow">Based in</h2>
           <p class="mt-4 font-display text-xl font-bold text-ink">Pune, Maharashtra</p>

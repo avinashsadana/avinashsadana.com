@@ -35,21 +35,39 @@ const mark = (x, y, size, stroke, dotRadius = 6) => {
   </g>`;
 };
 
+// Text sits left, portrait right. A face materially lifts click-through when
+// the link is pasted into LinkedIn or WhatsApp.
 const ogSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <rect width="1200" height="630" fill="${PAPER}"/>
 
-  ${mark(78, 62, 118, INK)}
+  ${mark(80, 74, 104, INK)}
 
-  <text x="82" y="300" font-family="${SERIF}" font-size="96" font-weight="500" fill="${INK}">avinash <tspan fill="${SOFT}">sadana</tspan></text>
+  <text x="82" y="296" font-family="${SERIF}" font-size="84" font-weight="500" fill="${INK}">avinash <tspan fill="${SOFT}">sadana</tspan></text>
 
-  <rect x="84" y="346" width="92" height="3" fill="${GOLD}"/>
+  <rect x="84" y="338" width="88" height="3" fill="${GOLD}"/>
 
-  <text x="82" y="416" font-family="${SERIF}" font-size="34" fill="${INK}">Supply chain and operations, built on the</text>
-  <text x="82" y="464" font-family="${SERIF}" font-size="34" fill="${INK}">discipline of endurance sport.</text>
+  <text x="82" y="404" font-family="${SERIF}" font-size="31" fill="${INK}">Supply chain and operations, built</text>
+  <text x="82" y="446" font-family="${SERIF}" font-size="31" fill="${INK}">on the discipline of endurance sport.</text>
 
-  <text x="82" y="556" font-family="${MONO}" font-size="21" letter-spacing="2.4" fill="${SOFT}">AVINASHSADANA.COM</text>
-  <text x="1118" y="556" text-anchor="end" font-family="${MONO}" font-size="21" letter-spacing="2.4" fill="${SOFT}">MBA · SUPPLY CHAIN · ULTRA-CYCLIST</text>
+  <text x="82" y="548" font-family="${MONO}" font-size="20" letter-spacing="2.2" fill="${SOFT}">AVINASHSADANA.COM</text>
 </svg>`;
+
+const PORTRAIT_SIZE = 330;
+const PORTRAIT_X = 782;
+const PORTRAIT_Y = 150;
+
+/** Rounded-square mask, applied with dest-in so the corners become transparent. */
+const portraitMask = Buffer.from(
+  `<svg xmlns="http://www.w3.org/2000/svg" width="${PORTRAIT_SIZE}" height="${PORTRAIT_SIZE}">
+     <rect width="${PORTRAIT_SIZE}" height="${PORTRAIT_SIZE}" rx="28" fill="#fff"/>
+   </svg>`,
+);
+
+const portrait = await sharp('src/assets/avinash-sadana.jpg')
+  .resize(PORTRAIT_SIZE, PORTRAIT_SIZE, { fit: 'cover' })
+  .composite([{ input: portraitMask, blend: 'dest-in' }])
+  .png()
+  .toBuffer();
 
 const appleIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180">
   <rect width="180" height="180" fill="${PAPER}"/>
@@ -59,16 +77,31 @@ const appleIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="180" height
 const faviconSvg = readFileSync('public/favicon.svg', 'utf8');
 
 const targets = [
-  { svg: ogSvg, out: 'public/og.png', width: 1200 },
+  { svg: ogSvg, out: 'public/og.jpg', width: 1200, overlay: portrait, jpeg: true },
   { svg: appleIconSvg, out: 'public/apple-touch-icon.png', width: 180 },
   { svg: faviconSvg, out: 'public/favicon-96.png', width: 96 },
 ];
 
-for (const { svg, out, width } of targets) {
-  const buffer = await sharp(Buffer.from(svg), { density: 300 })
-    .resize({ width })
-    .png({ compressionLevel: 9 })
-    .toBuffer();
+for (const { svg, out, width, overlay, jpeg } of targets) {
+  let pipeline = sharp(Buffer.from(svg), { density: 300 }).resize({ width });
+  if (overlay) {
+    pipeline = pipeline.composite([{ input: overlay, left: PORTRAIT_X, top: PORTRAIT_Y }]);
+  }
+  // The share card contains a photograph, so JPEG rather than PNG — the same
+  // image is ~350 kB as PNG and under 100 kB as JPEG.
+  const buffer = jpeg
+    ? await pipeline.jpeg({ quality: 88, mozjpeg: true }).toBuffer()
+    : await pipeline.png({ compressionLevel: 9 }).toBuffer();
   writeFileSync(out, buffer);
   console.log(`wrote ${out} (${(buffer.length / 1024).toFixed(1)} kB)`);
 }
+
+// A stable, unhashed copy for schema.org `image` and any external profile that
+// needs a permanent URL. Astro's optimised builds use content-hashed filenames,
+// which are unsuitable for a URL that must not change.
+const profile = await sharp('src/assets/avinash-sadana.jpg')
+  .resize(800, 800, { fit: 'cover' })
+  .jpeg({ quality: 82, mozjpeg: true })
+  .toBuffer();
+writeFileSync('public/avinash-sadana.jpg', profile);
+console.log(`wrote public/avinash-sadana.jpg (${(profile.length / 1024).toFixed(1)} kB)`);

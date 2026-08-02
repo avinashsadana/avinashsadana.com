@@ -176,7 +176,7 @@ test.describe('guestbook', () => {
     test.skip(!hasDb(), 'needs Supabase credentials');
     const row = await guestbookEntry(marker);
     expect(row, 'entry was stored').toBeTruthy();
-    expect(row.approved, 'entry is stored unapproved').toBe(false);
+    expect(row!.approved, 'entry is stored unapproved').toBe(false);
     await cleanup(marker);
   });
 });

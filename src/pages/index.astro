@@ -1,8 +1,10 @@
 ---
+import { Image } from 'astro:assets';
 import ArrowLink from '../components/ArrowLink.astro';
 import Section from '../components/Section.astro';
 import Stat from '../components/Stat.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import portrait from '../assets/avinash-sadana.jpg';
 import { dateRange, getExperience, getPosts, getPrograms, getVentures } from '../lib/content';
 import { site } from '../site.config';
 
@@ -19,10 +21,26 @@ const posts = (await getPosts()).slice(0, 2);
       {site.location} · Open to opportunities
     </p>
 
-    <h1 class="mt-7 font-display text-display font-bold text-ink">
-      <span class="reveal block">Avinash</span>
-      <span class="reveal block text-accent" style="--reveal-delay: 90ms">Sadana</span>
-    </h1>
+    <!-- The name and the face together. On large screens the portrait fills the
+         space the display type leaves to its right; below that it stacks. -->
+    <div class="mt-7 grid items-end gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-12">
+      <h1 class="order-2 font-display text-display font-bold text-ink lg:order-1">
+        <span class="reveal block">Avinash</span>
+        <span class="reveal block text-accent" style="--reveal-delay: 90ms">Sadana</span>
+      </h1>
+
+      <div class="reveal order-1 lg:order-2" style="--reveal-delay: 150ms">
+        <Image
+          src={portrait}
+          alt="Avinash Sadana"
+          width={620}
+          densities={[1, 2]}
+          loading="eager"
+          fetchpriority="high"
+          class="aspect-square w-40 rounded-2xl object-cover shadow-sm sm:w-48 lg:w-[19rem]"
+        />
+      </div>
+    </div>
 
     <div class="mt-10 grid gap-10 lg:mt-14 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
       <p
