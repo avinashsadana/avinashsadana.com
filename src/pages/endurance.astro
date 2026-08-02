@@ -1,5 +1,4 @@
 ---
-import { render } from 'astro:content';
 import PageHeader from '../components/PageHeader.astro';
 import Section from '../components/Section.astro';
 import ShareButtons from '../components/ShareButtons.astro';
@@ -8,9 +7,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { getEndurance } from '../lib/content';
 
 const entries = await getEndurance();
-const withBody = await Promise.all(
-  entries.map(async (entry) => ({ entry, Content: (await render(entry)).Content })),
-);
 
 const categoryLabel: Record<string, string> = {
   race: 'Race',
@@ -42,7 +38,7 @@ const categoryLabel: Record<string, string> = {
   <Section>
     <div class="space-y-8">
       {
-        withBody.map(({ entry, Content }, index) => (
+        entries.map((entry, index) => (
           <article
             class="reveal rounded-2xl border border-line bg-bg-raised p-7 lg:p-10"
             style={`--reveal-delay: ${index * 80}ms`}
@@ -69,10 +65,6 @@ const categoryLabel: Record<string, string> = {
             </div>
 
             <p class="prose-body mt-5">{entry.data.summary}</p>
-
-            <div class="prose-body mt-5 space-y-4 text-[0.95rem] [&_p]:m-0 [&_strong]:font-semibold [&_strong]:text-ink">
-              <Content />
-            </div>
           </article>
         ))
       }

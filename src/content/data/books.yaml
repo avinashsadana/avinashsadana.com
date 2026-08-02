@@ -1,0 +1,146 @@
+# The shelf on /reading.
+#
+# shelf must be one of: spirit | business | mind | adventure | ideas | verse
+# `author` is optional — leave it out rather than guess.
+# Add a book by copying any block. The shelf redraws itself.
+
+- id: gita
+  title: The Bhagavad Gita
+  shelf: spirit
+  order: 1
+- id: inner-engineering
+  title: Inner Engineering
+  author: Sadhguru
+  shelf: spirit
+  order: 2
+- id: death
+  title: Death
+  author: Sadhguru
+  shelf: spirit
+  order: 3
+- id: karma
+  title: Karma
+  author: Sadhguru
+  shelf: spirit
+  order: 4
+- id: ashtavakra
+  title: Ashtavakra Samhita
+  shelf: spirit
+  order: 5
+- id: osho
+  title: Osho
+  shelf: spirit
+  order: 6
+- id: million-thoughts
+  title: A Million Thoughts
+  author: Om Swami
+  shelf: spirit
+  order: 7
+- id: new-earth
+  title: A New Earth
+  author: Eckhart Tolle
+  shelf: spirit
+  order: 8
+
+- id: personal-mba
+  title: The Personal MBA
+  author: Josh Kaufman
+  shelf: business
+  order: 10
+- id: intelligent-investor
+  title: The Intelligent Investor
+  author: Benjamin Graham
+  shelf: business
+  order: 11
+- id: hooked
+  title: Hooked
+  author: Nir Eyal
+  shelf: business
+  order: 12
+- id: execution
+  title: Execution
+  author: Bossidy & Charan
+  shelf: business
+  order: 13
+- id: steve-jobs
+  title: Steve Jobs
+  author: Walter Isaacson
+  shelf: business
+  order: 14
+- id: art-of-war
+  title: The Art of War
+  author: Sun Tzu
+  shelf: business
+  order: 15
+- id: high-potential
+  title: High Potential
+  shelf: business
+  order: 16
+- id: think-and-grow-rich
+  title: Think and Grow Rich
+  author: Napoleon Hill
+  shelf: business
+  order: 17
+
+- id: thinking-fast-slow
+  title: Thinking, Fast and Slow
+  author: Daniel Kahneman
+  shelf: mind
+  order: 20
+- id: art-of-choosing
+  title: The Art of Choosing
+  author: Sheena Iyengar
+  shelf: mind
+  order: 21
+- id: mans-search
+  title: Man's Search for Meaning
+  author: Viktor Frankl
+  shelf: mind
+  order: 22
+- id: win-friends
+  title: How to Win Friends and Influence People
+  author: Dale Carnegie
+  shelf: mind
+  order: 23
+- id: numerology
+  title: Miracles of Numerology
+  shelf: mind
+  order: 24
+
+- id: tenzing
+  title: Man of Everest
+  author: Tenzing Norgay
+  shelf: adventure
+  order: 30
+- id: seven-years
+  title: Seven Years in Tibet
+  author: Heinrich Harrer
+  shelf: adventure
+  order: 31
+- id: lost-horizon
+  title: Lost Horizon
+  author: James Hilton
+  shelf: adventure
+  order: 32
+- id: life-of-pi
+  title: Life of Pi
+  author: Yann Martel
+  shelf: adventure
+  order: 33
+
+- id: sapiens
+  title: Sapiens
+  author: Yuval Noah Harari
+  shelf: ideas
+  order: 40
+
+- id: alchemist
+  title: The Alchemist
+  author: Paulo Coelho
+  shelf: verse
+  order: 50
+- id: wordsworth
+  title: 100 Selected Poems
+  author: William Wordsworth
+  shelf: verse
+  order: 51

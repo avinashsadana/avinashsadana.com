@@ -1,39 +1,29 @@
 ---
 import { Image } from 'astro:assets';
 import ArrowLink from '../components/ArrowLink.astro';
+import Facets from '../components/Facets.astro';
 import Section from '../components/Section.astro';
-import Stat from '../components/Stat.astro';
 import Timeline from '../components/Timeline.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import portrait from '../assets/avinash-sadana.jpg';
-import { dateRange, getExperience, getPosts, getPrograms, getVentures } from '../lib/content';
+import { dateRange, getPosts, getVentures } from '../lib/content';
 import { site } from '../site.config';
 
-const experience = await getExperience();
-/** Roles still running lead the "Right now" section. */
-const current = experience.filter((entry) => entry.data.current);
-const programs = await getPrograms();
 const ventures = await getVentures();
-const posts = (await getPosts()).slice(0, 2);
+const posts = (await getPosts()).slice(0, 3);
 ---
 
 <BaseLayout title={site.name} description={site.description}>
-  <!-- Hero -->
-  <section class="shell relative pt-14 pb-16 lg:pt-24 lg:pb-24">
-    <p class="eyebrow reveal">
-      {site.location} · Open to opportunities
-    </p>
+  <!-- Hero. Deliberately short: a name, one line, a face, and a way in. -->
+  <section class="shell pt-14 pb-16 lg:pt-24 lg:pb-20">
+    <p class="eyebrow reveal">Pune, India · Open to opportunities</p>
 
-    <!-- The name and the face together. On large screens the portrait fills the
-         space the display type leaves to its right; below that it stacks. -->
     <div class="mt-7 grid items-end gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-12">
       <h1 class="order-2 font-display text-display font-bold text-ink lg:order-1">
         <span class="reveal block">Avinash</span>
         <span class="reveal block text-accent" style="--reveal-delay: 90ms">Sadana</span>
       </h1>
 
-      <!-- Portrait crop rather than a square: taller reads as editorial, and the
-           offset gold rule behind it gives depth without adding decoration. -->
       <div class="reveal order-1 lg:order-2" style="--reveal-delay: 150ms">
         <div class="portrait-frame">
           <Image
@@ -50,175 +40,50 @@ const posts = (await getPosts()).slice(0, 2);
       </div>
     </div>
 
-    <div class="mt-10 grid gap-10 lg:mt-14 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
-      <p
-        class="reveal max-w-xl font-display text-2xl leading-tight font-semibold tracking-tight text-balance text-ink lg:text-3xl"
-        style="--reveal-delay: 150ms"
-      >
-        I’ve never been good at doing only one thing.
-      </p>
+    <p
+      class="reveal mt-12 max-w-3xl font-display text-2xl leading-snug font-semibold tracking-tight text-balance text-ink lg:mt-16 lg:text-4xl"
+      style="--reveal-delay: 180ms"
+    >
+      I make complicated things run.
+    </p>
 
-      <div class="reveal max-w-lg" style="--reveal-delay: 200ms">
-        <p class="prose-body">
-          Engineer by training, operator by trade. I run programme management and
-          strategy at TMA Drive, a startup manufacturing power quality solutions,
-          after procurement and supply chain inside heavy engineering — and I’m
-          finishing an MBA in International Business alongside it.
-        </p>
-        <p class="prose-body mt-4">
-          I also founded a music festival and a pan-India cycling community, race
-          ultra-distance on a bike, tell stories on stage, take photographs, write
-          the occasional poem, and read more than is strictly reasonable. The
-          through-line is the same everywhere: work out how the thing actually
-          works, then make it work better.
-        </p>
-
-        <div class="mt-8 flex flex-wrap items-center gap-3">
-          <a
-            href="/work"
-            class="btn-primary"
-          >
-            See the work
-            <svg
-              class="size-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M5 12h13M12 5.5 18.5 12 12 18.5"></path>
-            </svg>
-          </a>
-          <a
-            href="/contact"
-            class="btn-secondary"
-          >
-            Get in touch
-          </a>
-        </div>
-      </div>
+    <div class="reveal mt-8 flex flex-wrap items-center gap-3" style="--reveal-delay: 240ms">
+      <a href="/work" class="btn-primary">
+        See the work
+        <svg
+          class="size-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M5 12h13M12 5.5 18.5 12 12 18.5"></path>
+        </svg>
+      </a>
+      <a href="/contact" class="btn-secondary">Get in touch</a>
     </div>
   </section>
 
-  <!-- The numbers that actually mean something -->
-  <div class="border-y border-line bg-bg-raised">
-    <div class="shell grid grid-cols-2 gap-x-6 gap-y-10 py-12 lg:grid-cols-4 lg:py-16">
-      <Stat value={646} suffix=" km" label="Deccan Cliffhanger" detail="2nd rank, Pune to Goa" />
-      <Stat value={5} label="Festival editions" detail="700+ attendees" delay={80} />
-      <Stat value={2} label="Ventures founded" detail="Still running" delay={160} />
-      <Stat value={6} label="Certifications" detail="Incl. Lean Six Sigma" delay={240} />
-    </div>
-  </div>
-
-  <!-- Now -->
-  <Section eyebrow="Right now" title="What I’m working on">
-    <div class="grid gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-2">
-      {/* Any role marked `current: true` leads this section automatically. */}
-      {
-        current.map((entry) => (
-          <div class="bg-bg p-7 lg:p-9">
-            <p class="text-xs font-semibold tracking-[0.14em] text-accent uppercase">
-              {dateRange(entry.data.start, entry.data.end, entry.data.current)}
-            </p>
-            <h3 class="mt-3 font-display text-xl font-bold tracking-tight text-ink">
-              {entry.data.role}
-            </h3>
-            <p class="mt-2 text-sm font-medium text-muted">{entry.data.org}</p>
-            <p class="prose-body mt-4 text-[0.95rem]">{entry.data.summary}</p>
-          </div>
-        ))
-      }
-
-      <div class="bg-bg p-7 lg:p-9">
-        <p class="text-xs font-semibold tracking-[0.14em] text-accent uppercase">2024 — 2026</p>
-        <h3 class="mt-3 font-display text-xl font-bold tracking-tight text-ink">
-          MBA, International Business
-        </h3>
-        <p class="mt-2 text-sm font-medium text-muted">MIT World Peace University, Pune</p>
-        <p class="prose-body mt-4 text-[0.95rem]">
-          Specialising in international business, with coursework and projects focused on
-          supply chain, market entry and operations strategy.
-        </p>
-      </div>
-
-      <div class="bg-bg p-7 lg:p-9">
-        <p class="text-xs font-semibold tracking-[0.14em] text-accent uppercase">Since 2018</p>
-        <h3 class="mt-3 font-display text-xl font-bold tracking-tight text-ink">Cycle N’ Chai</h3>
-        <p class="mt-2 text-sm font-medium text-muted">Founder</p>
-        <p class="prose-body mt-4 text-[0.95rem]">
-          Running a pan-India community for cycling enthusiasts — endurance rides, races
-          and bikepacking events, organised end to end.
-        </p>
-      </div>
-
-      {
-        programs.map((program) => (
-          <div class="bg-bg p-7 lg:p-9">
-            <p class="text-xs font-semibold tracking-[0.14em] text-accent uppercase">
-              {dateRange(program.data.start, program.data.end, program.data.current)}
-            </p>
-            <h3 class="mt-3 font-display text-xl font-bold tracking-tight text-ink">
-              {program.data.title}
-            </h3>
-            <p class="mt-2 text-sm font-medium text-muted">{program.data.org}</p>
-            <p class="prose-body mt-4 text-[0.95rem]">{program.data.summary}</p>
-          </div>
-        ))
-      }
-    </div>
+  <!-- Breadth, shown rather than described. -->
+  <Section eyebrow="In short" title="Six ways in" divider>
+    <Facets />
   </Section>
 
   <!-- Everything at once -->
   <Section
     eyebrow="The whole picture"
-    title="Several things, mostly at the same time"
-    lead="Work, study, ventures, sport and the odd award — on parallel tracks, because that is how they actually happened. Hover or tap anything."
+    title="Mostly at the same time"
+    lead="Work, study, ventures, sport and recognition on parallel tracks. Hover or tap anything."
     divider
   >
     <Timeline />
   </Section>
 
-  <!-- Experience -->
-  <Section eyebrow="Experience" title="Where I’ve worked" divider>
-    <ul class="divide-y divide-line border-y border-line">
-      {
-        experience.map((entry, index) => (
-          <li class="reveal" style={`--reveal-delay: ${index * 70}ms`}>
-            <a
-              href={`/work#${entry.id}`}
-              class="group grid gap-3 py-7 transition-colors sm:grid-cols-[10rem_1fr] sm:gap-8 lg:py-9"
-            >
-              <p class="text-sm font-medium text-subtle tabular-nums">
-                {dateRange(entry.data.start, entry.data.end, entry.data.current)}
-              </p>
-              <div>
-                <h3 class="font-display text-xl font-bold tracking-tight text-ink lg:text-2xl">
-                  <span class="link-underline">{entry.data.org}</span>
-                </h3>
-                <p class="mt-1.5 text-sm font-medium text-accent">{entry.data.role}</p>
-                <p class="prose-body mt-3 text-[0.95rem]">{entry.data.summary}</p>
-              </div>
-            </a>
-          </li>
-        ))
-      }
-    </ul>
-
-    <div class="mt-9">
-      <ArrowLink href="/work">Full background and capabilities</ArrowLink>
-    </div>
-  </Section>
-
   <!-- Ventures -->
-  <Section
-    eyebrow="Ventures"
-    title="Things I built"
-    lead="Both started as side projects. Both outgrew that description."
-    divider
-  >
+  <Section eyebrow="Ventures" title="Things I built" divider>
     <div class="grid gap-6 lg:grid-cols-2">
       {
         ventures.map((venture, index) => (
@@ -234,8 +99,7 @@ const posts = (await getPosts()).slice(0, 2);
               <h3 class="mt-3 font-display text-2xl font-bold tracking-tight text-ink lg:text-3xl">
                 <span class="link-underline">{venture.data.name}</span>
               </h3>
-              <p class="mt-2 text-sm font-medium text-muted">{venture.data.tagline}</p>
-              <p class="prose-body mt-5 text-[0.95rem]">{venture.data.summary}</p>
+              <p class="mt-2 text-sm text-muted">{venture.data.tagline}</p>
             </div>
 
             {venture.data.stats.length > 0 && (
@@ -243,7 +107,7 @@ const posts = (await getPosts()).slice(0, 2);
                 {venture.data.stats.map((stat) => (
                   <div>
                     <dt class="text-xs tracking-wide text-subtle uppercase">{stat.label}</dt>
-                    <dd class="mt-1 font-display text-lg font-bold text-ink">{stat.value}</dd>
+                    <dd class="mt-1 font-display text-xl font-bold text-ink">{stat.value}</dd>
                   </div>
                 ))}
               </dl>
@@ -254,34 +118,20 @@ const posts = (await getPosts()).slice(0, 2);
     </div>
   </Section>
 
-  <!-- Endurance -->
-  <Section
-    eyebrow="Endurance"
-    title="646 kilometres, Pune to Goa"
-    lead="Second place in India’s Race Across America qualifier — and the reason I think about operations the way I do."
-    divider
-  >
-    <ArrowLink href="/endurance">The racing and the riding</ArrowLink>
-  </Section>
-
   <!-- Writing -->
   {
     posts.length > 0 && (
       <Section eyebrow="Writing" title="Recent thinking" divider>
-        <ul class="grid gap-6 lg:grid-cols-2">
+        <ul class="divide-y divide-line border-y border-line">
           {posts.map((post, index) => (
-            <li class="reveal" style={`--reveal-delay: ${index * 90}ms`}>
-              <a
-                href={`/writing/${post.id}`}
-                class="group block rounded-2xl border border-line bg-bg-raised p-7 transition-colors hover:border-line-strong"
-              >
-                <p class="text-xs font-semibold tracking-[0.14em] text-subtle uppercase">
+            <li class="reveal" style={`--reveal-delay: ${index * 70}ms`}>
+              <a href={`/writing/${post.id}`} class="group flex flex-wrap items-baseline gap-x-6 gap-y-1 py-6">
+                <span class="font-mono text-xs text-subtle">
                   {post.data.tags[0] ?? 'Essay'}
-                </p>
-                <h3 class="mt-3 font-display text-xl font-bold tracking-tight text-ink">
+                </span>
+                <h3 class="flex-1 font-display text-xl font-bold tracking-tight text-ink lg:text-2xl">
                   <span class="link-underline">{post.data.title}</span>
                 </h3>
-                <p class="prose-body mt-3 text-[0.95rem]">{post.data.description}</p>
               </a>
             </li>
           ))}

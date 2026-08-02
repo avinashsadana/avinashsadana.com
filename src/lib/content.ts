@@ -26,6 +26,8 @@ export const getAchievements = async () => (await getCollection('achievements'))
 
 export const getTimeline = async () => (await getCollection('timeline')).sort(byOrder);
 
+export const getBooks = async () => (await getCollection('books')).sort(byOrder);
+
 /** Published posts, newest first. Drafts are excluded from every build. */
 export const getPosts = async () =>
   (await getCollection('writing', ({ data }) => !data.draft)).sort(

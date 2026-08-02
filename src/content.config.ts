@@ -147,6 +147,18 @@ const achievements = defineCollection({
   }),
 });
 
+const books = defineCollection({
+  loader: file('src/content/data/books.yaml'),
+  schema: z.object({
+    id: z.string(),
+    title: z.string(),
+    /** Left out where the author is uncertain — better blank than wrong. */
+    author: z.string().optional(),
+    shelf: z.enum(['spirit', 'business', 'mind', 'adventure', 'ideas', 'verse']),
+    order: z.number(),
+  }),
+});
+
 const timeline = defineCollection({
   loader: file('src/content/data/timeline.yaml'),
   schema: z.object({
@@ -162,6 +174,7 @@ const timeline = defineCollection({
 });
 
 export const collections = {
+  books,
   timeline,
   experience,
   programs,

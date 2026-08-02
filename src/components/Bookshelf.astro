@@ -1,0 +1,291 @@
+---
+import { getBooks } from '../lib/content';
+
+/**
+ * A shelf of book spines, drawn entirely in CSS — no cover images, so it costs
+ * nothing to load and never shows a broken thumbnail.
+ *
+ * Filtering is CSS-driven via a data attribute on the root, so it stays instant
+ * and works the moment the page paints. Without JavaScript every spine is
+ * simply shown, which is the correct fallback.
+ */
+
+const books = await getBooks();
+
+const shelves = [
+  { key: 'spirit', label: 'Spirit & philosophy' },
+  { key: 'business', label: 'Business & strategy' },
+  { key: 'mind', label: 'Mind & behaviour' },
+  { key: 'adventure', label: 'Adventure' },
+  { key: 'ideas', label: 'History & ideas' },
+  { key: 'verse', label: 'Fiction & verse' },
+] as const;
+
+const present = shelves.filter((s) => books.some((b) => b.data.shelf === s.key));
+
+/** Deterministic spine width so the shelf looks handmade, not uniform. */
+const spineWidth = (title: string) => 42 + ((title.length * 7) % 22);
+---
+
+<div class="shelf-root" data-bookshelf data-filter="all">
+  <div class="shelf-filters" role="group" aria-label="Filter by shelf">
+    <button type="button" class="shelf-chip" data-shelf-filter="all" aria-pressed="true">
+      Everything <span class="shelf-count">{books.length}</span>
+    </button>
+    {
+      present.map((s) => (
+        <button type="button" class="shelf-chip" data-shelf-filter={s.key} aria-pressed="false">
+          {s.label}
+          <span class="shelf-count">{books.filter((b) => b.data.shelf === s.key).length}</span>
+        </button>
+      ))
+    }
+  </div>
+
+  <div class="shelf">
+    <ul class="shelf-books">
+      {
+        books.map((book) => (
+          <li class="shelf-item" data-shelf={book.data.shelf}>
+            <button
+              type="button"
+              class="spine"
+              style={`--w:${spineWidth(book.data.title)}px`}
+              data-title={book.data.title}
+              data-author={book.data.author ?? ''}
+              data-shelf-label={
+                shelves.find((s) => s.key === book.data.shelf)?.label ?? book.data.shelf
+              }
+            >
+              <span class="spine-title">{book.data.title}</span>
+            </button>
+          </li>
+        ))
+      }
+    </ul>
+    <div class="shelf-board" aria-hidden="true"></div>
+  </div>
+
+  <p class="shelf-detail" data-shelf-detail>
+    <span class="shelf-detail-hint">Pick a spine.</span>
+  </p>
+</div>
+
+<script>
+  function initBookshelf() {
+    const root = document.querySelector<HTMLElement>('[data-bookshelf]');
+    if (!root || root.dataset.bound === 'true') return;
+    root.dataset.bound = 'true';
+
+    const chips = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-shelf-filter]'));
+    const spines = Array.from(root.querySelectorAll<HTMLButtonElement>('.spine'));
+    const detail = root.querySelector<HTMLElement>('[data-shelf-detail]');
+
+    for (const chip of chips) {
+      chip.addEventListener('click', () => {
+        const value = chip.dataset.shelfFilter ?? 'all';
+        root.dataset.filter = value;
+        for (const c of chips) c.setAttribute('aria-pressed', String(c === chip));
+      });
+    }
+
+    const show = (spine: HTMLButtonElement) => {
+      if (!detail) return;
+      const { title, author, shelfLabel } = spine.dataset;
+      detail.innerHTML = '';
+
+      const strong = document.createElement('strong');
+      strong.textContent = title ?? '';
+      detail.append(strong);
+
+      if (author) detail.append(document.createTextNode(` — ${author}`));
+      if (shelfLabel) {
+        const tag = document.createElement('span');
+        tag.className = 'shelf-detail-tag';
+        tag.textContent = shelfLabel;
+        detail.append(tag);
+      }
+      for (const s of spines) s.setAttribute('aria-current', String(s === spine));
+    };
+
+    for (const spine of spines) {
+      spine.addEventListener('mouseenter', () => show(spine));
+      spine.addEventListener('focus', () => show(spine));
+      spine.addEventListener('click', () => show(spine));
+    }
+  }
+
+  initBookshelf();
+  document.addEventListener('astro:page-load', initBookshelf);
+</script>
+
+<style>
+  .shelf-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .shelf-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    border: 1px solid var(--c-border);
+    border-radius: 999px;
+    padding: 0.4rem 0.85rem;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--c-text-muted);
+    cursor: pointer;
+    transition:
+      border-color 0.18s ease,
+      color 0.18s ease;
+  }
+
+  .shelf-chip:hover {
+    border-color: var(--c-border-strong);
+    color: var(--c-text);
+  }
+
+  .shelf-chip[aria-pressed='true'] {
+    border-color: var(--c-border-strong);
+    background-color: var(--c-button);
+    color: var(--c-button-text);
+  }
+
+  .shelf-count {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    opacity: 0.7;
+  }
+
+  .shelf-books {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 4px;
+    list-style: none;
+    padding: 0;
+  }
+
+  /* Filtering is a single attribute swap on the root — no per-node JS. */
+  .shelf-root[data-filter='spirit'] .shelf-item:not([data-shelf='spirit']),
+  .shelf-root[data-filter='business'] .shelf-item:not([data-shelf='business']),
+  .shelf-root[data-filter='mind'] .shelf-item:not([data-shelf='mind']),
+  .shelf-root[data-filter='adventure'] .shelf-item:not([data-shelf='adventure']),
+  .shelf-root[data-filter='ideas'] .shelf-item:not([data-shelf='ideas']),
+  .shelf-root[data-filter='verse'] .shelf-item:not([data-shelf='verse']) {
+    display: none;
+  }
+
+  .spine {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    width: var(--w);
+    height: 190px;
+    padding: 0.7rem 0.35rem;
+    border: 1px solid var(--c-border);
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    background-color: var(--c-bg-raised);
+    cursor: pointer;
+    transition:
+      transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 0.22s ease,
+      background-color 0.22s ease;
+  }
+
+  /* Each shelf gets a different tint of the same ink, so the groups read as
+     groups without introducing colours the brand doesn't have. */
+  .shelf-item[data-shelf='spirit'] .spine {
+    background-color: color-mix(in oklab, var(--c-gold) 14%, var(--c-bg-raised));
+  }
+  .shelf-item[data-shelf='business'] .spine {
+    background-color: color-mix(in oklab, var(--c-text) 9%, var(--c-bg-raised));
+  }
+  .shelf-item[data-shelf='mind'] .spine {
+    background-color: color-mix(in oklab, var(--c-gold) 7%, var(--c-bg-raised));
+  }
+  .shelf-item[data-shelf='adventure'] .spine {
+    background-color: color-mix(in oklab, var(--c-text) 16%, var(--c-bg-raised));
+  }
+  .shelf-item[data-shelf='ideas'] .spine {
+    background-color: color-mix(in oklab, var(--c-gold) 22%, var(--c-bg-raised));
+  }
+  .shelf-item[data-shelf='verse'] .spine {
+    background-color: color-mix(in oklab, var(--c-text) 4%, var(--c-bg-raised));
+  }
+
+  .spine:hover,
+  .spine[aria-current='true'] {
+    transform: translateY(-10px);
+    border-color: var(--c-border-strong);
+  }
+
+  .spine-title {
+    writing-mode: vertical-rl;
+    rotate: 180deg;
+    max-height: 100%;
+    overflow: hidden;
+    font-family: var(--font-display);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--c-text);
+  }
+
+  .shelf-board {
+    height: 6px;
+    border-radius: 2px;
+    background-color: var(--c-border-strong);
+    opacity: 0.85;
+  }
+
+  .shelf-detail {
+    margin-top: 1.1rem;
+    min-height: 1.6rem;
+    font-size: 0.92rem;
+    color: var(--c-text-muted);
+  }
+
+  .shelf-detail strong {
+    font-weight: 600;
+    color: var(--c-text);
+  }
+
+  .shelf-detail-hint {
+    color: var(--c-text-subtle);
+  }
+
+  .shelf-detail-tag {
+    margin-left: 0.6rem;
+    border: 1px solid var(--c-border);
+    border-radius: 999px;
+    padding: 0.1rem 0.55rem;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--c-text-subtle);
+  }
+
+  @media (max-width: 640px) {
+    .spine {
+      height: 150px;
+    }
+    .spine-title {
+      font-size: 0.7rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .spine:hover,
+    .spine[aria-current='true'] {
+      transform: none;
+    }
+  }
+</style>

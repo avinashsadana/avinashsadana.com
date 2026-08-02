@@ -15,16 +15,18 @@ export const site = {
   country: 'IN',
 
   /** Used as the <title> suffix and in the JSON-LD `jobTitle`. */
-  role: 'Engineer · Operator · Founder · Athlete',
+  role: 'Programmes · Operations · Strategy',
+
+  /** The one-line pitch. Simple on purpose. */
+  tagline: 'I make complicated things run.',
 
   /**
-   * The one-line pitch. Deliberately not field-specific — the point is breadth.
-   * Kept under ~120 characters so it survives as a meta description prefix.
+   * Capability-led, not employer-led. No company name here on purpose — the
+   * description should describe what Avinash can do, not where he happens to
+   * work. Employers belong in the work history, not the metadata.
    */
-  tagline: 'Engineer, operator, founder, ultra-cyclist, storyteller.',
-
   description:
-    'Avinash Sadana — engineer by training, operator by trade, founder twice over, ultra-distance cyclist, storyteller and photographer. Programme management and strategy at TMA Drive, MBA in International Business, founder of The WeDesi Festival and Cycle N’ Chai. Curious about how things work, and restless about making them work better.',
+    'Avinash Sadana — I make complicated things run. Programme management, process design and strategy, from heavy engineering to power manufacturing. Lean Six Sigma Green Belt, MBA in International Business, founder of a music festival and a pan-India cycling community, ultra-distance cyclist.',
 
   /** Three words that head the hero. Change these and the hero changes. */
   heroWords: ['Operations', 'Ventures', 'Endurance'],
@@ -35,6 +37,16 @@ export const socials = [
     label: 'LinkedIn',
     href: 'https://www.linkedin.com/in/avinashsadana',
     handle: 'in/avinashsadana',
+  },
+  {
+    label: 'Instagram',
+    href: 'https://www.instagram.com/avinashsadana/',
+    handle: '@avinashsadana',
+  },
+  {
+    label: 'Cycle N’ Chai on Instagram',
+    href: 'https://www.instagram.com/cycle.and.chai/',
+    handle: '@cycle.and.chai',
   },
   {
     label: 'Cycle N’ Chai',
@@ -52,13 +64,14 @@ export const nav = [
   { label: 'Work', href: '/work' },
   { label: 'Ventures', href: '/ventures' },
   { label: 'Endurance', href: '/endurance' },
+  { label: 'Reading', href: '/reading' },
   { label: 'Writing', href: '/writing' },
   { label: 'About', href: '/about' },
-  { label: 'Contact', href: '/contact' },
 ] as const;
 
 /** Links that only appear in the footer. */
 export const footerNav = [
+  { label: 'Contact', href: '/contact' },
   { label: 'Guestbook', href: '/guestbook' },
   { label: 'Résumé', href: '/resume' },
   { label: 'RSS', href: '/rss.xml' },
