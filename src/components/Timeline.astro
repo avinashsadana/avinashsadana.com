@@ -63,7 +63,7 @@ const colEnd = (item: (typeof items)[number]) =>
               aria-describedby={`tl-detail-${item.id}`}
             >
               <span class="tl-bar-text">{item.data.label}</span>
-              {!item.data.endYear && <span class="tl-live" aria-label="ongoing" />}
+              {!item.data.endYear && <span class="tl-live" aria-hidden="true" />}
             </button>
           ))}
         </div>

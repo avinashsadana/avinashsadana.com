@@ -47,7 +47,7 @@ const certifications = await getCertifications();
               <span class="role-dates">
                 {dateRange(entry.data.start, entry.data.end, entry.data.current)}
               </span>
-              {entry.data.current && <span class="role-live" aria-label="current role" />}
+              {entry.data.current && <span class="role-live" aria-hidden="true" />}
             </div>
 
             <div>
