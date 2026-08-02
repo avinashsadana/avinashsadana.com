@@ -1,0 +1,195 @@
+---
+/**
+ * How Avinash approaches a problem, as a diagram rather than a paragraph.
+ *
+ * Four steps on a connected track — the shape of a delivery plan, which is the
+ * point: the graphic itself is the argument. Horizontal on desktop, vertical on
+ * mobile, connector drawn with a pseudo-element so there is no SVG to scale.
+ */
+
+const steps = [
+  {
+    n: '01',
+    title: 'Map it',
+    body: 'Every step, every owner, every wait. Most of a process is invisible until it is drawn.',
+    icon: 'M4 6.5 9.5 4l5 2.5L20 4v13.5L14.5 20l-5-2.5L4 20V6.5ZM9.5 4v13.5M14.5 6.5V20',
+  },
+  {
+    n: '02',
+    title: 'Find the constraint',
+    body: 'One thing sets the pace. Improving anything else is motion, not progress.',
+    icon: 'M12 3.5v7M12 13.5v7M4.5 12h7M13.5 12h7M12 13.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z',
+  },
+  {
+    n: '03',
+    title: 'Rebuild the handoff',
+    body: 'Delay lives between steps, not inside them. Fix the seam and the whole line speeds up.',
+    icon: 'M4 8h9a3.5 3.5 0 0 1 0 7H7M4 8l3-3M4 8l3 3M20 15l-3-3M20 15l-3 3',
+  },
+  {
+    n: '04',
+    title: 'Make it hold',
+    body: 'Design for the tired version of the team. A process that needs everyone alert is a hope.',
+    icon: 'M12 3.5 5 6.5v5.2c0 4.1 2.9 7.9 7 8.8 4.1-.9 7-4.7 7-8.8V6.5L12 3.5ZM9 12l2.2 2.2L15.5 10',
+  },
+] as const;
+---
+
+<ol class="method">
+  {
+    steps.map((s, i) => (
+      <li class="method-step reveal" style={`--reveal-delay:${i * 90}ms`}>
+        <div class="method-head">
+          <span class="method-n">{s.n}</span>
+          <svg
+            class="method-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.4"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d={s.icon} />
+          </svg>
+        </div>
+        <p class="method-title">{s.title}</p>
+        <p class="method-body">{s.body}</p>
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .method {
+    display: grid;
+    gap: 2.25rem 0;
+    list-style: none;
+    padding: 0;
+    counter-reset: none;
+  }
+
+  @media (min-width: 768px) {
+    .method {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0 1.5rem;
+    }
+  }
+
+  .method-step {
+    position: relative;
+    padding-top: 1.9rem;
+  }
+
+  /* The track. A single line behind every marker on desktop; a vertical spine
+     on mobile. Drawn in CSS so it scales with the layout automatically. */
+  .method-step::before {
+    content: '';
+    position: absolute;
+    background-color: var(--c-border);
+  }
+
+  @media (min-width: 768px) {
+    .method-step::before {
+      top: 0.72rem;
+      left: 0;
+      right: -1.5rem;
+      height: 1px;
+    }
+
+    .method-step:last-child::before {
+      right: 0;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .method-step {
+      padding-top: 0;
+      padding-left: 3.1rem;
+    }
+
+    .method-step::before {
+      top: 2.2rem;
+      bottom: -2.25rem;
+      left: 0.72rem;
+      width: 1px;
+    }
+
+    .method-step:last-child::before {
+      display: none;
+    }
+  }
+
+  .method-head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  @media (max-width: 767px) {
+    .method-head {
+      position: absolute;
+      top: 0;
+      left: 0;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  }
+
+  /* The marker sits on the track, so it needs the page background behind it. */
+  .method-n {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 1.45rem;
+    height: 1.45rem;
+    margin-top: -0.72rem;
+    border: 1px solid var(--c-gold);
+    border-radius: 50%;
+    background-color: var(--c-bg);
+    font-family: var(--font-mono);
+    font-size: 0.56rem;
+    color: var(--c-accent);
+  }
+
+  @media (max-width: 767px) {
+    .method-n {
+      margin-top: 1.5rem;
+    }
+  }
+
+  .method-icon {
+    width: 1.15rem;
+    height: 1.15rem;
+    color: var(--c-text-subtle);
+  }
+
+  @media (max-width: 767px) {
+    .method-icon {
+      display: none;
+    }
+  }
+
+  .method-title {
+    margin-top: 1.1rem;
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--c-text);
+  }
+
+  @media (max-width: 767px) {
+    .method-title {
+      margin-top: 1.25rem;
+    }
+  }
+
+  .method-body {
+    margin-top: 0.4rem;
+    max-width: 34ch;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--c-text-muted);
+  }
+</style>

@@ -6,7 +6,7 @@ location: Pune → Goa, India
 distanceKm: 646
 result: 2nd Rank
 featured: true
-order: 1
+order: 2
 summary: >-
   Second place over 646 kilometres from Pune to Goa — India’s qualifying race
   for the Race Across America, ridden continuously against a hard cut-off.

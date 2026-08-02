@@ -75,7 +75,7 @@ const endurance = defineCollection({
   loader: glob({ base: './src/content/endurance', pattern: '**/*.md' }),
   schema: z.object({
     title: z.string(),
-    category: z.enum(['race', 'ride', 'triathlon', 'ambassador']),
+    category: z.enum(['race', 'ride', 'run', 'triathlon', 'ambassador']),
     year: z.string().optional(),
     location: z.string().optional(),
     distanceKm: z.number().optional(),

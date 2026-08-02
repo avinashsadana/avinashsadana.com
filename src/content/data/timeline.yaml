@@ -61,9 +61,16 @@
 - id: ultra
   lane: sport
   label: Ultra-distance racing
-  detail: 2nd at the 646 km Deccan Cliffhanger, plus 300–1000 km rides and triathlon.
+  detail: A 1000 km unsupported ride, 2nd at the 646 km Deccan Cliffhanger, and triathlon.
   startYear: 2023
   order: 8
+
+- id: trail
+  lane: sport
+  label: Trail running & ultras
+  detail: Ultra-distance on foot, off-road, many times over.
+  startYear: 2023
+  order: 8.5
 
 - id: mba
   lane: education

@@ -11,6 +11,7 @@ const entries = await getEndurance();
 const categoryLabel: Record<string, string> = {
   race: 'Race',
   ride: 'Ride',
+  run: 'Trail running',
   triathlon: 'Triathlon',
   ambassador: 'Ambassador',
 };
@@ -18,20 +19,20 @@ const categoryLabel: Record<string, string> = {
 
 <BaseLayout
   title="Endurance"
-  description="Ultra-distance cycling and triathlon — 2nd rank at the 646 km Deccan Cliffhanger, multiple 300–1000 km rides, and Key Opinion Leader work with Saucony."
+  description="Ultra-distance cycling and trail running — a 1000 km unsupported ride, 2nd at the 646 km Deccan Cliffhanger, multiple trail ultras, triathlon, and Key Opinion Leader work with Saucony."
 >
   <PageHeader
     eyebrow="Endurance"
     title="Long distances, planned properly"
-    lead="Ultra-distance cycling and triathlon. The results matter less than what the training taught me about planning for the version of yourself that is exhausted."
+    lead="Ultra-distance on a bike and on foot. The results matter less than what the training taught me about planning for the version of yourself that is exhausted."
   />
 
   <div class="border-y border-line bg-bg-raised">
     <div class="shell grid grid-cols-2 gap-x-6 gap-y-10 py-12 lg:grid-cols-4 lg:py-16">
-      <Stat value={646} suffix=" km" label="Longest race" detail="Deccan Cliffhanger" />
-      <Stat value={2} suffix="nd" label="Rank" detail="Pune to Goa" delay={80} />
-      <Stat value={1000} suffix=" km" label="Longest rides" detail="Self-planned, unsupported" delay={160} />
-      <Stat value={2018} label="Riding since" detail="Founded Cycle N’ Chai" delay={240} />
+      <Stat value={1000} suffix=" km" label="Longest ride" detail="Unsupported, self-planned" />
+      <Stat value={646} suffix=" km" label="Longest race" detail="2nd, Deccan Cliffhanger" delay={80} />
+      <Stat value={2} suffix=" sports" label="On foot and wheels" detail="Trail ultras and cycling" delay={160} />
+      <Stat value={2018} label="Going since" detail="Founded Cycle N’ Chai" delay={240} />
     </div>
   </div>
 

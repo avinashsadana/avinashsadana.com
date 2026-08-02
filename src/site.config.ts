@@ -44,6 +44,11 @@ export const socials = [
     handle: '@avinashsadana',
   },
   {
+    label: 'Strava',
+    href: 'https://www.strava.com/athletes/31162575',
+    handle: 'strava.com/athletes',
+  },
+  {
     label: 'Cycle N’ Chai on Instagram',
     href: 'https://www.instagram.com/cycle.and.chai/',
     handle: '@cycle.and.chai',

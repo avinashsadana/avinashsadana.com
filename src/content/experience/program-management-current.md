@@ -6,9 +6,9 @@ start: Jul 2026
 current: true
 kind: role
 summary: >-
-  Programme management and strategy support at TMA Drive, a new-age startup
-  manufacturing power quality solutions — the delivery side of hardware, where
-  the schedule is only as good as the coordination behind it.
+  Programme management and strategy support at a new-age startup manufacturing
+  power quality solutions — the delivery side of hardware, where the schedule
+  is only as good as the coordination behind it.
 highlights:
   - >-
     Run programme management across workstreams — scoping, sequencing and

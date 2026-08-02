@@ -3,7 +3,7 @@ title: Key Opinion Leader — Saucony
 category: ambassador
 location: Vadodara, India
 featured: true
-order: 4
+order: 6
 summary: >-
   Brand influencer and Key Opinion Leader for Saucony, a top-ten global running
   brand — including organising the Vadodara Saucony Run.
