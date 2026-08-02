@@ -1,4 +1,6 @@
 ---
+import { getBooks, getPosts } from '../lib/content';
+
 /**
  * The breadth, shown rather than claimed.
  *
@@ -7,6 +9,9 @@
  * seconds and can dig into any of it. Tiles are links, so this is navigation
  * as well as illustration.
  */
+
+const bookCount = (await getBooks()).length;
+const postCount = (await getPosts()).length;
 
 const facets = [
   {
@@ -35,7 +40,7 @@ const facets = [
   },
   {
     label: 'Reading',
-    metric: '27',
+    metric: String(bookCount),
     unit: 'on the shelf',
     note: 'Gita to Kahneman',
     href: '/reading',
@@ -43,7 +48,7 @@ const facets = [
   },
   {
     label: 'Writing',
-    metric: '5',
+    metric: String(postCount),
     unit: 'essays',
     note: 'Models, process, distance',
     href: '/writing',
@@ -57,7 +62,7 @@ const facets = [
     href: '/about',
     icon: 'M12 15.5a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11ZM8.5 14.5 7 21l5-2.5L17 21l-1.5-6.5',
   },
-] as const;
+];
 ---
 
 <ul class="facets">
