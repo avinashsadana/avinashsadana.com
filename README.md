@@ -56,6 +56,13 @@ Spam is handled without a CAPTCHA: an off-screen honeypot field, a minimum
 submit time, and a per-IP-hash rate limit. IP addresses are salted and hashed —
 never stored raw.
 
+Security headers live in `vercel.json`: a Content-Security-Policy,
+`X-Content-Type-Options`, `Referrer-Policy` and `Permissions-Policy`
+(Vercel adds HSTS itself). `font-src` has to allow `data:` — Vite inlines small
+woff2 subsets as data URIs, and a preview deploy without it blocked every font
+on the page. Always test a header change on a preview deploy before production;
+`vercel.json` also rejects unknown keys, so notes like this belong here.
+
 ---
 
 ## Local development
