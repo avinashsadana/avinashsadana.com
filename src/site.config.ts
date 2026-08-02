@@ -17,8 +17,8 @@ export const site = {
   /** Used as the <title> suffix and in the JSON-LD `jobTitle`. */
   role: 'Programmes · Operations · Strategy',
 
-  /** The one-line pitch. Simple on purpose. */
-  tagline: 'I make complicated things run.',
+  /** The one-line pitch. Setup then claim — simple on purpose. */
+  tagline: 'Good ideas are everywhere. I make them work.',
 
   /**
    * Capability-led, not employer-led. No company name here on purpose — the
@@ -26,7 +26,7 @@ export const site = {
    * work. Employers belong in the work history, not the metadata.
    */
   description:
-    'Avinash Sadana — I make complicated things run. Programme management, process design and strategy, from heavy engineering to power manufacturing. Lean Six Sigma Green Belt, MBA in International Business, founder of a music festival and a pan-India cycling community, ultra-distance cyclist.',
+    'Avinash Sadana — good ideas are everywhere; I make them work. Programme management, process design and strategy, from heavy engineering to power manufacturing. Lean Six Sigma Green Belt, MBA in International Business, founder of a music festival and a pan-India cycling community, ultra-distance cyclist and trail runner.',
 
   /** Three words that head the hero. Change these and the hero changes. */
   heroWords: ['Operations', 'Ventures', 'Endurance'],

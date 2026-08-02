@@ -31,7 +31,7 @@ const categoryLabel: Record<string, string> = {
     <div class="shell grid grid-cols-2 gap-x-6 gap-y-10 py-12 lg:grid-cols-4 lg:py-16">
       <Stat value={1000} suffix=" km" label="Longest ride" detail="Unsupported, self-planned" />
       <Stat value={646} suffix=" km" label="Longest race" detail="2nd, Deccan Cliffhanger" delay={80} />
-      <Stat value={2} suffix=" sports" label="On foot and wheels" detail="Trail ultras and cycling" delay={160} />
+      <Stat value={365} suffix=" days" label="Ran every day" detail="A full year, no rest days" delay={160} />
       <Stat value={2018} label="Going since" detail="Founded Cycle N’ Chai" delay={240} />
     </div>
   </div>
@@ -71,8 +71,90 @@ const categoryLabel: Record<string, string> = {
       }
     </div>
 
-    <div class="mt-14 border-t border-line pt-8">
-      <ShareButtons title="Avinash Sadana — ultra-distance cycling and triathlon" />
+    <!-- Strava is the receipts: everything above is logged there. -->
+    <a
+      class="strava-card reveal"
+      href="https://www.strava.com/athletes/31162575"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <svg class="strava-mark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M13.8 16.2 11.4 11.5 9 16.2H5.3L11.4 4l6.1 12.2h-3.7Z" />
+        <path d="m16.2 16.2-1.7 3.4-1.7-3.4h-2.5l4.2 8 4.2-8h-2.5Z" opacity="0.65" />
+      </svg>
+      <div>
+        <p class="strava-title">Every kilometre, logged</p>
+        <p class="strava-note">Follow the training and the races on Strava</p>
+      </div>
+      <svg
+        class="strava-arrow"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M7 17 17 7M8 7h9v9" />
+      </svg>
+    </a>
+
+    <div class="mt-12 border-t border-line pt-8">
+      <ShareButtons title="Avinash Sadana — ultra-distance cycling and trail running" />
     </div>
   </Section>
 </BaseLayout>
+
+<style>
+  .strava-card {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    margin-top: 2.5rem;
+    padding: 1.35rem 1.6rem;
+    border: 1px solid var(--c-border);
+    border-radius: 16px;
+    background-color: var(--c-bg-raised);
+    transition:
+      border-color 0.2s ease,
+      background-color 0.2s ease;
+  }
+
+  .strava-card:hover {
+    border-color: var(--c-border-strong);
+  }
+
+  .strava-mark {
+    flex: none;
+    width: 1.75rem;
+    height: 1.75rem;
+    color: var(--c-gold);
+  }
+
+  .strava-title {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--c-text);
+  }
+
+  .strava-note {
+    margin-top: 0.1rem;
+    font-size: 0.85rem;
+    color: var(--c-text-muted);
+  }
+
+  .strava-arrow {
+    flex: none;
+    width: 1.05rem;
+    height: 1.05rem;
+    margin-left: auto;
+    color: var(--c-text-subtle);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .strava-card:hover .strava-arrow {
+    transform: translate(2px, -2px);
+  }
+</style>

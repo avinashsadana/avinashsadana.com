@@ -46,8 +46,8 @@ const ogSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630"
 
   <rect x="84" y="338" width="88" height="3" fill="${GOLD}"/>
 
-  <text x="82" y="404" font-family="${SERIF}" font-size="31" fill="${INK}">Processes, business models, and the</text>
-  <text x="82" y="446" font-family="${SERIF}" font-size="31" fill="${INK}">discipline of endurance sport.</text>
+  <text x="82" y="404" font-family="${SERIF}" font-size="31" fill="${SOFT}">Good ideas are everywhere.</text>
+  <text x="82" y="446" font-family="${SERIF}" font-size="31" fill="${INK}">I make them work.</text>
 
   <text x="82" y="548" font-family="${MONO}" font-size="20" letter-spacing="2.2" fill="${SOFT}">AVINASHSADANA.COM</text>
 </svg>`;

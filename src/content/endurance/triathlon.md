@@ -4,7 +4,7 @@ category: triathlon
 summary: >-
   Competing as a triathlete alongside ultra-distance cycling — swim, bike and
   run, and the training discipline of holding three sports at once.
-order: 5
+order: 6
 ---
 
 Triathlon is the counterweight to ultra-cycling. Where an ultra is a single
