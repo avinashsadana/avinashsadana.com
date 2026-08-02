@@ -94,8 +94,9 @@ test('content is readable with JavaScript disabled', async ({ browser }) => {
   const page = await context.newPage();
   await page.goto('/');
 
-  // Scroll-reveal must never be the reason content is invisible.
+  // Scroll-reveal and the intro overlay must never be the reason content is
+  // missing: both are progressive enhancements layered over real HTML.
   await expect(page.getByRole('heading', { name: /Avinash/ })).toBeVisible();
-  await expect(page.getByText(/MBA candidate in International Business/)).toBeVisible();
+  await expect(page.getByText(/programme management and strategy support/)).toBeVisible();
   await context.close();
 });

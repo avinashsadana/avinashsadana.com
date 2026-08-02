@@ -1,0 +1,90 @@
+---
+/**
+ * First-visit intro: the logo mark draws itself in one stroke, the gold
+ * terminal dot lands, and the overlay clears. About one second, once per
+ * browser session.
+ *
+ * Cost: zero. The SVG is inline (no request), the animation is pure CSS (no
+ * library, no JavaScript on the critical path), and nothing is fetched — so it
+ * adds no server work and no bytes beyond the markup below.
+ *
+ * It self-destructs in CSS rather than JavaScript: the final keyframe sets
+ * `visibility: hidden`, so even if scripting fails the overlay still clears and
+ * the site is never blocked behind it. Page content renders underneath the
+ * whole time, so crawlers and reduced-motion users are unaffected.
+ *
+ * The 270 dash length is the measured length of the mark's path.
+ */
+---
+
+<div class="preloader" aria-hidden="true">
+  <svg viewBox="0 0 120 120" width="86" height="86" focusable="false">
+    <path
+      class="preloader-stroke"
+      d="M24,96 L44,24 L64,96 C34,96 34,66 64,66 C94,66 94,36 64,36"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="10"
+      stroke-linecap="round"
+      stroke-linejoin="round"></path>
+    <circle class="preloader-dot" cx="64" cy="36" r="6" fill="var(--c-gold)"></circle>
+  </svg>
+</div>
+
+<style>
+  .preloader {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: grid;
+    place-items: center;
+    background-color: var(--c-bg);
+    color: var(--c-text);
+    pointer-events: none;
+    animation: preloader-out 0.32s ease 0.78s forwards;
+  }
+
+  /* Already seen this session — never render it again. */
+  :global(.intro-done) .preloader {
+    display: none;
+  }
+
+  .preloader-stroke {
+    stroke-dasharray: 270;
+    stroke-dashoffset: 270;
+    animation: preloader-draw 0.72s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  }
+
+  .preloader-dot {
+    transform-origin: 64px 36px;
+    scale: 0;
+    animation: preloader-pop 0.26s cubic-bezier(0.34, 1.56, 0.64, 1) 0.6s forwards;
+  }
+
+  @keyframes preloader-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes preloader-pop {
+    to {
+      scale: 1;
+    }
+  }
+
+  @keyframes preloader-out {
+    to {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+
+  /* No animation for anyone who has asked not to see any — the overlay is
+     simply never shown, rather than shown and instantly removed. */
+  @media (prefers-reduced-motion: reduce) {
+    .preloader {
+      display: none;
+    }
+  }
+</style>

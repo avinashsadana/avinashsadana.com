@@ -9,6 +9,8 @@ import { dateRange, getExperience, getPosts, getPrograms, getVentures } from '..
 import { site } from '../site.config';
 
 const experience = await getExperience();
+/** Roles still running lead the "Right now" section. */
+const current = experience.filter((entry) => entry.data.current);
 const programs = await getPrograms();
 const ventures = await getVentures();
 const posts = (await getPosts()).slice(0, 2);
@@ -48,15 +50,20 @@ const posts = (await getPosts()).slice(0, 2);
         class="reveal max-w-xl font-display text-2xl leading-tight font-semibold tracking-tight text-balance text-ink lg:text-3xl"
         style="--reveal-delay: 150ms"
       >
-        Supply chain and operations, built on the discipline of endurance sport.
+        I take processes apart, find where they stall, and put them back together.
       </p>
 
       <div class="reveal max-w-lg" style="--reveal-delay: 200ms">
         <p class="prose-body">
-          I’m an MBA candidate in International Business at MIT World Peace University,
-          with hands-on work in procurement, strategic sourcing and manufacturing
-          operations. Alongside that I founded a music festival and a pan-India cycling
-          community — and I race ultra-distance on a bike.
+          That’s the work: programme management and strategy support at a power
+          manufacturing startup, after procurement and supply chain inside heavy
+          engineering. What I actually enjoy is the layer underneath — the business
+          model a process exists to serve, and why some models compound while others
+          just spin.
+        </p>
+        <p class="prose-body mt-4">
+          Outside it I founded a music festival and a pan-India cycling community, and
+          I race ultra-distance on a bike. I like living my life, not just planning it.
         </p>
 
         <div class="mt-8 flex flex-wrap items-center gap-3">
@@ -102,6 +109,22 @@ const posts = (await getPosts()).slice(0, 2);
   <!-- Now -->
   <Section eyebrow="Right now" title="What I’m working on">
     <div class="grid gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-2">
+      {/* Any role marked `current: true` leads this section automatically. */}
+      {
+        current.map((entry) => (
+          <div class="bg-bg p-7 lg:p-9">
+            <p class="text-xs font-semibold tracking-[0.14em] text-accent uppercase">
+              {dateRange(entry.data.start, entry.data.end, entry.data.current)}
+            </p>
+            <h3 class="mt-3 font-display text-xl font-bold tracking-tight text-ink">
+              {entry.data.role}
+            </h3>
+            <p class="mt-2 text-sm font-medium text-muted">{entry.data.org}</p>
+            <p class="prose-body mt-4 text-[0.95rem]">{entry.data.summary}</p>
+          </div>
+        ))
+      }
+
       <div class="bg-bg p-7 lg:p-9">
         <p class="text-xs font-semibold tracking-[0.14em] text-accent uppercase">2024 — 2026</p>
         <h3 class="mt-3 font-display text-xl font-bold tracking-tight text-ink">

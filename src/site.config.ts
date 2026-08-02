@@ -15,13 +15,13 @@ export const site = {
   country: 'IN',
 
   /** Used as the <title> suffix and in the JSON-LD `jobTitle`. */
-  role: 'MBA · International Business',
+  role: 'Programme Management & Strategy',
 
   /** The one-line pitch. Kept under ~120 characters so it survives as a meta description prefix. */
-  tagline: 'Supply chain and operations, built on the discipline of endurance sport.',
+  tagline: 'Processes, business models, and the discipline of endurance sport.',
 
   description:
-    'Avinash Sadana — MBA candidate in International Business specialising in supply chain, procurement and operations. Founder of The WeDesi Festival and Cycle N’ Chai, Lean Six Sigma Green Belt, and an ultra-distance cyclist.',
+    'Avinash Sadana — programme management and strategy in power manufacturing, MBA in International Business. I take processes apart to find where they stall, and I read business models for fun. Founder of The WeDesi Festival and Cycle N’ Chai, Lean Six Sigma Green Belt, ultra-distance cyclist.',
 
   /** Three words that head the hero. Change these and the hero changes. */
   heroWords: ['Operations', 'Ventures', 'Endurance'],

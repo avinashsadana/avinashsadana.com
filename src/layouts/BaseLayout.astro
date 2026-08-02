@@ -2,6 +2,7 @@
 import { ClientRouter } from 'astro:transitions';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
+import Preloader from '../components/Preloader.astro';
 import Seo from '../components/Seo.astro';
 import { site, socials } from '../site.config';
 import '../styles/global.css';
@@ -89,9 +90,12 @@ const websiteSchema = {
 
     <Seo {...seo} />
 
+    <!-- Runs before first paint: resolves the theme (so there is never a flash
+         of the wrong one) and decides whether the intro overlay should show.
+         The intro plays once per browser session, not on every navigation. -->
     <script
       is:inline
-      set:html={`(function(){try{var t=localStorage.getItem('theme');var d=t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches);var e=document.documentElement;e.classList.toggle('dark',d);e.style.colorScheme=d?'dark':'light';e.classList.remove('no-js')}catch(_){}})();`}
+      set:html={`(function(){var e=document.documentElement;try{var t=localStorage.getItem('theme');var d=t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches);e.classList.toggle('dark',d);e.style.colorScheme=d?'dark':'light'}catch(_){}try{if(sessionStorage.getItem('intro'))e.classList.add('intro-done');else sessionStorage.setItem('intro','1')}catch(_){e.classList.add('intro-done')}e.classList.remove('no-js')})();`}
     />
 
     <script
@@ -110,6 +114,8 @@ const websiteSchema = {
   </head>
 
   <body class="min-h-dvh">
+    <Preloader />
+
     <a
       href="#main"
       class="btn-primary sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100]"

@@ -1,4 +1,4 @@
-@import '@fontsource-variable/fraunces';
+@import '@fontsource-variable/newsreader';
 @import '@fontsource-variable/inter';
 @import '@fontsource-variable/jetbrains-mono';
 @import 'tailwindcss';
@@ -88,7 +88,7 @@
   --color-button: var(--c-button);
   --color-button-text: var(--c-button-text);
 
-  --font-display: 'Fraunces Variable', ui-serif, Georgia, serif;
+  --font-display: 'Newsreader Variable', ui-serif, Georgia, serif;
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, monospace;
 
@@ -131,8 +131,10 @@
   h3,
   h4 {
     font-family: var(--font-display);
-    /* Fraunces is a variable optical-size serif; 600 keeps the headline weight
-       editorial without tipping into the heaviness of a display grotesk. */
+    /* Newsreader replaced Fraunces here: Fraunces' soft, bouncy terminals read
+       as playful at display size, which is wrong for this site. Newsreader is
+       an editorial text serif — refined at 90px, still warm, never cartoonish.
+       Optical sizing lets it thicken slightly at small sizes. */
     font-weight: 600;
     font-optical-sizing: auto;
     text-wrap: balance;
