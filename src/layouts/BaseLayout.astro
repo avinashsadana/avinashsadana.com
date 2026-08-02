@@ -28,7 +28,7 @@ const personSchema = {
   name: site.name,
   url: site.url,
   email: `mailto:${site.email}`,
-  jobTitle: 'MBA Candidate, International Business',
+  jobTitle: 'Programme Management & Strategy',
   description: site.description,
   image: `${site.url}/avinash-sadana.jpg`,
   address: {
@@ -50,13 +50,17 @@ const personSchema = {
     },
   ],
   knowsAbout: [
+    'Programme Management',
+    'Process Design and Improvement',
+    'Business Model Analysis',
     'Supply Chain Management',
     'Procurement and Strategic Sourcing',
     'Operations Management',
     'Lean Six Sigma',
-    'Project and Programme Management',
     'Market Research',
+    'Public Speaking and Storytelling',
     'Ultra-distance Cycling',
+    'Photography',
   ],
   sameAs: socials.filter((s) => s.href.startsWith('http')).map((s) => s.href),
 };
