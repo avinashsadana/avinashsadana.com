@@ -33,8 +33,10 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "@axe-core/playwright": "^4.12.1",
     "@playwright/test": "^1.62.1",
     "@types/pg": "^8.20.3",
+    "axe-core": "^4.12.1",
     "pg": "^8.22.0",
     "prettier": "^3.9.6",
     "prettier-plugin-astro": "^0.14.1",

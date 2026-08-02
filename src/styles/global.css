@@ -24,8 +24,12 @@
   /* Soft ink (#7A7E85) only reaches 3.77:1 on paper, so body and label colours
      are darkened until they clear 4.5:1. The brand hue is preserved; the
      lightness is not, because unreadable text is not on brand either. */
+  /* Both are checked against the *darkest* surface they ever sit on
+     (--c-bg-sunken, used by the footer), not just the page background.
+     At #6b6f76 the eyebrow labels were 4.31:1 in the footer — an axe audit
+     caught it. #63666c clears 4.5:1 on paper, raised and sunken alike. */
   --c-text-muted: #5f636a;
-  --c-text-subtle: #6b6f76;
+  --c-text-subtle: #63666c;
   --c-border: #e4e1da;
   --c-border-strong: #22252a;
 
