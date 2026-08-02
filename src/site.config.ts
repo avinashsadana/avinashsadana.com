@@ -15,13 +15,16 @@ export const site = {
   country: 'IN',
 
   /** Used as the <title> suffix and in the JSON-LD `jobTitle`. */
-  role: 'Programme Management & Strategy',
+  role: 'Engineer · Operator · Founder · Athlete',
 
-  /** The one-line pitch. Kept under ~120 characters so it survives as a meta description prefix. */
-  tagline: 'Processes, business models, and the discipline of endurance sport.',
+  /**
+   * The one-line pitch. Deliberately not field-specific — the point is breadth.
+   * Kept under ~120 characters so it survives as a meta description prefix.
+   */
+  tagline: 'Engineer, operator, founder, ultra-cyclist, storyteller.',
 
   description:
-    'Avinash Sadana — programme management and strategy in power manufacturing, MBA in International Business. I take processes apart to find where they stall, and I read business models for fun. Founder of The WeDesi Festival and Cycle N’ Chai, Lean Six Sigma Green Belt, ultra-distance cyclist.',
+    'Avinash Sadana — engineer by training, operator by trade, founder twice over, ultra-distance cyclist, storyteller and photographer. Programme management and strategy at TMA Drive, MBA in International Business, founder of The WeDesi Festival and Cycle N’ Chai. Curious about how things work, and restless about making them work better.',
 
   /** Three words that head the hero. Change these and the hero changes. */
   heroWords: ['Operations', 'Ventures', 'Endurance'],

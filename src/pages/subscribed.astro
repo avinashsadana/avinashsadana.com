@@ -1,0 +1,37 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+export const prerender = false;
+
+const status = Astro.url.searchParams.get('status');
+
+const states = {
+  ok: {
+    title: 'You’re on the list.',
+    body: 'Thanks for confirming. You’ll hear from me when there’s something worth reading — not on a schedule, and not often.',
+  },
+  invalid: {
+    title: 'That link didn’t work.',
+    body: 'It may have already been used, or it expired. Subscribing again will send you a fresh one.',
+  },
+  error: {
+    title: 'Something went wrong.',
+    body: 'That’s on my end, not yours. Try the link again in a few minutes.',
+  },
+} as const;
+
+const state = states[(status as keyof typeof states) ?? 'invalid'] ?? states.invalid;
+---
+
+<BaseLayout title="Newsletter" description="Newsletter confirmation." noindex>
+  <div class="shell flex min-h-[55vh] flex-col justify-center py-20">
+    <p class="eyebrow">Newsletter</p>
+    <h1 class="mt-5 font-display text-hero font-bold text-ink">{state.title}</h1>
+    <p class="prose-body mt-5 text-lg">{state.body}</p>
+
+    <div class="mt-10 flex flex-wrap gap-3">
+      <a href="/writing" class="btn-primary">Read the writing</a>
+      <a href="/" class="btn-secondary">Home</a>
+    </div>
+  </div>
+</BaseLayout>

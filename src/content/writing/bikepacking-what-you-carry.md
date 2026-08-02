@@ -7,7 +7,7 @@ pubDate: 2026-08-02
 tags:
   - Endurance
   - Bikepacking
-draft: true
+draft: false
 ---
 
 Bikepacking is cycle touring with the luxuries removed. No support vehicle, no

@@ -8,7 +8,7 @@ pubDate: 2026-08-02
 tags:
   - Business Models
   - Supply Chain
-draft: true
+draft: false
 ---
 
 During my internship at Godrej & Boyce I ran a market study on entering new

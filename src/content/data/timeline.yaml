@@ -1,0 +1,104 @@
+# The graphical timeline on the home page and /work.
+#
+# lane must be one of: work | education | ventures | sport | creative
+# startYear / endYear are numbers. Leave endYear out for anything still running.
+# Everything here is drawn to scale automatically — just add a row.
+
+- id: ncc
+  lane: creative
+  label: Best NCC Cadet of Gujarat
+  detail: Across Army, Navy and Air Force wings. Led and trained cadets across camps.
+  startYear: 2015
+  endYear: 2016
+  order: 1
+
+- id: nss
+  lane: creative
+  label: Best NSS Volunteer
+  detail: SVIT. Plus two state-level awards in photography and poetry.
+  startYear: 2018
+  endYear: 2019
+  order: 2
+
+- id: cycle-n-chai
+  lane: ventures
+  label: Cycle N’ Chai
+  detail: Founded a pan-India cycling community. Rides, races and bikepacking.
+  startYear: 2018
+  order: 3
+
+- id: be
+  lane: education
+  label: BE, Instrumentation & Control
+  detail: Sardar Vallabhbhai Patel Institute of Technology. Graduated with distinction.
+  startYear: 2019
+  endYear: 2023
+  order: 4
+
+- id: wedesi
+  lane: ventures
+  label: The WeDesi Festival
+  detail: Founded a music festival in Gujarat. Five editions, 700+ attendees, still running.
+  startYear: 2020
+  order: 5
+
+- id: automation-games
+  lane: creative
+  label: India Automation Games
+  detail: Represented Vadodara City at the Asia-Pacific event.
+  startYear: 2022
+  endYear: 2022
+  order: 6
+
+- id: topnotch
+  lane: work
+  label: TopNotch Foods
+  detail: Quality control and production planning on a live manufacturing floor.
+  startYear: 2023
+  endYear: 2023
+  order: 7
+
+- id: ultra
+  lane: sport
+  label: Ultra-distance racing
+  detail: 2nd at the 646 km Deccan Cliffhanger, plus 300–1000 km rides and triathlon.
+  startYear: 2023
+  order: 8
+
+- id: mba
+  lane: education
+  label: MBA, International Business
+  detail: MIT World Peace University, Pune.
+  startYear: 2024
+  endYear: 2026
+  order: 9
+
+- id: saucony
+  lane: sport
+  label: Saucony — Key Opinion Leader
+  detail: Brand ambassador; organised the Vadodara Saucony Run.
+  startYear: 2024
+  order: 10
+
+- id: godrej
+  lane: work
+  label: Godrej & Boyce
+  detail: Procurement, strategic sourcing and global market research in heavy engineering.
+  startYear: 2025
+  endYear: 2025
+  order: 11
+
+- id: hackathon
+  lane: creative
+  label: 1st Runner-up, Business Idea Hackathon
+  detail: MIT World Peace University.
+  startYear: 2025
+  endYear: 2025
+  order: 12
+
+- id: tma
+  lane: work
+  label: TMA Drive
+  detail: Programme management and strategy support at a power quality solutions startup.
+  startYear: 2026
+  order: 13

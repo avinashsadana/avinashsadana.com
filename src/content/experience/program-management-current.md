@@ -1,16 +1,14 @@
 ---
-# TODO(avinash): replace `org` with the company's actual name — everything else
-# here is accurate. One-line edit and it goes live.
 role: Management Trainee — Program Management & Strategy Support
-org: Transformer & Power Supply Solutions Manufacturer
+org: TMA Drive
 location: India
 start: Jul 2026
 current: true
 kind: role
 summary: >-
-  Programme management and strategy support at a new-age manufacturing startup
-  building transformers and power supply solutions — the delivery side of
-  hardware, where the schedule is only as good as the coordination behind it.
+  Programme management and strategy support at TMA Drive, a new-age startup
+  manufacturing power quality solutions — the delivery side of hardware, where
+  the schedule is only as good as the coordination behind it.
 highlights:
   - >-
     Run programme management across workstreams — scoping, sequencing and

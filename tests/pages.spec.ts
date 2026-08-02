@@ -96,7 +96,13 @@ test('content is readable with JavaScript disabled', async ({ browser }) => {
 
   // Scroll-reveal and the intro overlay must never be the reason content is
   // missing: both are progressive enhancements layered over real HTML.
+  // Asserted structurally rather than against exact copy, so rewriting the
+  // marketing text can never break this check.
   await expect(page.getByRole('heading', { name: /Avinash/ })).toBeVisible();
-  await expect(page.getByText(/programme management and strategy support/)).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Primary' })).toBeVisible();
+
+  const visibleText = await page.evaluate(() => document.body.innerText.trim().length);
+  expect(visibleText, 'substantial content renders without JS').toBeGreaterThan(800);
+
   await context.close();
 });

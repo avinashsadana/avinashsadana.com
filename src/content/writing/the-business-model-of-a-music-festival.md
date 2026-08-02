@@ -7,7 +7,7 @@ pubDate: 2026-08-02
 tags:
   - Business Models
   - Ventures
-draft: true
+draft: false
 ---
 
 Most festival business models are variations on one sentence: sell more tickets

@@ -27,12 +27,20 @@ interface Entry {
   created_at: string;
 }
 
+interface Subscriber {
+  id: string;
+  email: string;
+  status: string;
+  created_at: string;
+}
+
 let messages: Message[] = [];
 let entries: Entry[] = [];
+let subscribers: Subscriber[] = [];
 
 if (signedIn) {
   const supabase = getSupabase();
-  const [messageResult, entryResult] = await Promise.all([
+  const [messageResult, entryResult, subscriberResult] = await Promise.all([
     supabase
       .from('contact_messages')
       .select('id, name, email, subject, message, status, created_at')
@@ -44,11 +52,20 @@ if (signedIn) {
       .select('id, name, role, message, approved, created_at')
       .order('created_at', { ascending: false })
       .limit(200),
+    supabase
+      .from('newsletter_subscribers')
+      .select('id, email, status, created_at')
+      .order('created_at', { ascending: false })
+      .limit(1000),
   ]);
 
   messages = (messageResult.data ?? []) as Message[];
   entries = (entryResult.data ?? []) as Entry[];
+  subscribers = (subscriberResult.data ?? []) as Subscriber[];
 }
+
+const confirmed = subscribers.filter((s) => s.status === 'confirmed');
+const pendingSubs = subscribers.filter((s) => s.status === 'pending');
 
 const pending = entries.filter((entry) => !entry.approved);
 const published = entries.filter((entry) => entry.approved);
@@ -196,6 +213,66 @@ const when = (value: string) =>
                 ))}
               </ul>
             )}
+          </section>
+
+          <section class="mt-16">
+            <h2 class="eyebrow">
+              Newsletter · {confirmed.length} confirmed, {pendingSubs.length} pending
+            </h2>
+
+            {subscribers.length === 0 ? (
+              <p class="prose-body mt-5 text-[0.95rem]">No subscribers yet.</p>
+            ) : (
+              <div class="mt-6">
+                <button
+                  type="button"
+                  class="btn-primary px-5 py-2 text-xs"
+                  data-export-subscribers
+                >
+                  Copy confirmed emails
+                </button>
+                <p class="mt-2 text-xs text-subtle" data-export-status />
+
+                <ul class="mt-5 divide-y divide-line border-y border-line">
+                  {subscribers.slice(0, 50).map((s) => (
+                    <li class="flex flex-wrap items-center justify-between gap-3 py-3">
+                      <span class="text-sm text-ink">{s.email}</span>
+                      <span
+                        class:list={[
+                          'rounded-full px-2.5 py-0.5 text-xs font-semibold',
+                          s.status === 'confirmed'
+                            ? 'bg-accent-soft text-accent'
+                            : 'border border-line text-subtle',
+                        ]}
+                      >
+                        {s.status}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                {subscribers.length > 50 && (
+                  <p class="mt-3 text-xs text-subtle">
+                    Showing the 50 most recent of {subscribers.length}.
+                  </p>
+                )}
+              </div>
+            )}
+
+            <script
+              is:inline
+              define:vars={{ emails: confirmed.map((s) => s.email) }}
+              set:html={`
+                document.querySelector('[data-export-subscribers]')?.addEventListener('click', async function () {
+                  var out = document.querySelector('[data-export-status]');
+                  try {
+                    await navigator.clipboard.writeText(emails.join(', '));
+                    if (out) out.textContent = emails.length + ' addresses copied to your clipboard.';
+                  } catch (e) {
+                    if (out) out.textContent = 'Could not copy automatically — ' + emails.join(', ');
+                  }
+                });
+              `}
+            />
           </section>
 
           <section class="mt-16">

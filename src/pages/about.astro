@@ -94,14 +94,16 @@ const categories = [
       </div>
 
       <aside class="reveal space-y-10" style="--reveal-delay: 100ms">
-        <Image
-          src={portrait}
-          alt="Avinash Sadana"
-          width={760}
-          densities={[1, 2]}
-          quality={78}
-          class="aspect-square w-full max-w-sm rounded-2xl object-cover"
-        />
+        <div class="portrait-frame">
+          <Image
+            src={portrait}
+            alt="Avinash Sadana"
+            width={760}
+            densities={[1, 2]}
+            quality={78}
+            class="portrait-img w-full max-w-[19rem]"
+          />
+        </div>
 
         <div>
           <h2 class="eyebrow">Based in</h2>

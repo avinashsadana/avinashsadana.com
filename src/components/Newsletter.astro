@@ -1,0 +1,125 @@
+---
+/**
+ * Newsletter signup. Double opt-in — this form only triggers a confirmation
+ * email; nobody joins the list without clicking the link in it.
+ */
+---
+
+<form id="newsletter-form" class="newsletter" novalidate>
+  <div class="absolute -left-[9999px] h-px w-px overflow-hidden" aria-hidden="true">
+    <label for="fax">Fax</label>
+    <input id="fax" name="fax" type="text" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <label for="newsletter-email" class="block text-sm font-semibold text-ink">
+    Get new writing by email
+  </label>
+  <p class="mt-1.5 text-sm text-muted">
+    Occasional essays on business models, process and endurance sport. No schedule, no
+    noise, unsubscribe in one click.
+  </p>
+
+  <div class="mt-4 flex flex-col gap-2.5 sm:flex-row">
+    <input
+      id="newsletter-email"
+      name="email"
+      type="email"
+      required
+      maxlength={254}
+      autocomplete="email"
+      placeholder="you@example.com"
+      class="w-full rounded-full border border-line bg-bg px-5 py-3 text-[0.95rem] text-ink placeholder:text-subtle transition-colors focus:border-accent focus:outline-none aria-[invalid=true]:border-accent sm:max-w-xs"
+      aria-describedby="newsletter-status"
+    />
+    <button type="submit" class="btn-primary shrink-0" data-submit>
+      <span data-submit-label>Subscribe</span>
+    </button>
+  </div>
+
+  <p
+    id="newsletter-status"
+    class="mt-3 text-sm font-medium"
+    role="status"
+    aria-live="polite"
+    data-newsletter-status
+    hidden
+  >
+  </p>
+</form>
+
+<script>
+  interface ApiResponse {
+    ok?: boolean;
+    message?: string;
+    error?: string;
+  }
+
+  function bindNewsletter() {
+    const form = document.getElementById('newsletter-form') as HTMLFormElement | null;
+    if (!form || form.dataset.bound === 'true') return;
+    form.dataset.bound = 'true';
+
+    const renderedAt = Date.now();
+    const input = form.querySelector<HTMLInputElement>('#newsletter-email');
+    const button = form.querySelector<HTMLButtonElement>('[data-submit]');
+    const label = form.querySelector<HTMLElement>('[data-submit-label]');
+    const status = form.querySelector<HTMLElement>('[data-newsletter-status]');
+
+    const show = (message: string, ok: boolean) => {
+      if (!status) return;
+      status.textContent = message;
+      status.hidden = false;
+      status.className = `mt-3 text-sm font-medium ${ok ? 'text-accent' : 'text-ink'}`;
+      input?.setAttribute('aria-invalid', String(!ok));
+    };
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const email = (input?.value ?? '').trim();
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+        show('That email address doesn’t look right.', false);
+        input?.focus();
+        return;
+      }
+
+      if (button) button.disabled = true;
+      if (label) label.textContent = 'Sending…';
+
+      try {
+        const response = await fetch('/api/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email,
+            fax: (form.querySelector('#fax') as HTMLInputElement | null)?.value ?? '',
+            elapsedMs: Date.now() - renderedAt,
+          }),
+        });
+
+        const result = (await response.json().catch(() => ({}))) as ApiResponse;
+
+        if (response.ok && result.ok) {
+          form.reset();
+          show(result.message ?? 'Check your inbox to confirm.', true);
+          return;
+        }
+        show(result.error ?? 'Something went wrong. Please try again.', false);
+      } catch {
+        show('Couldn’t reach the server. Check your connection and try again.', false);
+      } finally {
+        if (button) button.disabled = false;
+        if (label) label.textContent = 'Subscribe';
+      }
+    });
+  }
+
+  bindNewsletter();
+  document.addEventListener('astro:page-load', bindNewsletter);
+</script>
+
+<style>
+  .newsletter {
+    position: relative;
+  }
+</style>

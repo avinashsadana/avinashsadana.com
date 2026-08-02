@@ -258,6 +258,35 @@
     background-size: 100% 1.5px;
   }
 
+  /* Editorial portrait: a 4:5 crop with a gold rule offset behind it. The rule
+     is a pseudo-element rather than a border so it never affects layout, and
+     the whole thing collapses to just the image under reduced motion. */
+  .portrait-frame {
+    position: relative;
+    width: fit-content;
+  }
+
+  .portrait-frame::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    translate: 0.85rem 0.85rem;
+    border: 1px solid var(--c-gold);
+    border-radius: 14px;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .portrait-img {
+    position: relative;
+    display: block;
+    aspect-ratio: 4 / 5;
+    border-radius: 14px;
+    object-fit: cover;
+    /* Biases the crop upward so the face sits in the top half, not dead centre. */
+    object-position: 50% 22%;
+  }
+
   .prose-body {
     max-width: 68ch;
     font-size: 1.0625rem;

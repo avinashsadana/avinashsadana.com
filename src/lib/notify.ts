@@ -84,3 +84,46 @@ export async function sendContactNotification(payload: ContactNotification): Pro
     throw new Error(`Resend rejected the message: ${error.message}`);
   }
 }
+
+/**
+ * Double opt-in confirmation for newsletter signups.
+ *
+ * Unlike the contact notification, a failure here matters: without this email
+ * the subscriber can never confirm, so /api/subscribe surfaces the error rather
+ * than swallowing it.
+ */
+export async function sendConfirmationEmail(email: string, token: string): Promise<void> {
+  const apiKey = env('RESEND_API_KEY');
+  if (!apiKey) throw new Error('RESEND_API_KEY is not configured.');
+
+  const from = env('CONTACT_FROM_EMAIL') ?? 'Website <onboarding@resend.dev>';
+  const confirmUrl = `${site.url}/api/confirm?token=${encodeURIComponent(token)}`;
+
+  const resend = new Resend(apiKey);
+  const { error } = await resend.emails.send({
+    from,
+    to: email,
+    subject: 'Confirm your subscription — avinashsadana.com',
+    text: [
+      'Thanks for subscribing to my writing on business models, process and endurance sport.',
+      '',
+      'Confirm your subscription by opening this link:',
+      confirmUrl,
+      '',
+      "If you didn't sign up, ignore this email — nothing happens without that click.",
+    ].join('\n'),
+    html: `
+      <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:520px;line-height:1.6;color:#22252a">
+        <p style="margin:0 0 18px">Thanks for subscribing to my writing on business models, process and endurance sport.</p>
+        <p style="margin:0 0 26px">
+          <a href="${confirmUrl}" style="display:inline-block;background:#22252a;color:#f7f6f3;padding:12px 22px;border-radius:999px;text-decoration:none;font-weight:600">Confirm subscription</a>
+        </p>
+        <p style="margin:0;font-size:13px;color:#7a7e85">
+          If you didn't sign up, just ignore this — nothing happens without that click.
+        </p>
+      </div>
+    `,
+  });
+
+  if (error) throw new Error(`Resend rejected the confirmation: ${error.message}`);
+}

@@ -147,7 +147,22 @@ const achievements = defineCollection({
   }),
 });
 
+const timeline = defineCollection({
+  loader: file('src/content/data/timeline.yaml'),
+  schema: z.object({
+    id: z.string(),
+    lane: z.enum(['work', 'education', 'ventures', 'sport', 'creative']),
+    label: z.string(),
+    detail: z.string(),
+    startYear: z.number().int(),
+    /** Omitted for anything still running. */
+    endYear: z.number().int().optional(),
+    order: z.number(),
+  }),
+});
+
 export const collections = {
+  timeline,
   experience,
   programs,
   ventures,

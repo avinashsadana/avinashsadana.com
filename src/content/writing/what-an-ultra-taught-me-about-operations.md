@@ -8,10 +8,7 @@ tags:
   - Operations
   - Endurance
   - Supply Chain
-# Written from the facts in your résumé, in your voice, as a starting point.
-# READ IT FIRST. Change anything that isn't true or doesn't sound like you.
-# When you're happy with it, change `draft: true` to `draft: false` and it goes live.
-draft: true
+draft: false
 ---
 
 There is a moment somewhere past the three-hundred-kilometre mark of an ultra

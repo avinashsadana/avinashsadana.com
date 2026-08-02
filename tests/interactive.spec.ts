@@ -11,6 +11,10 @@ test.describe('theme', () => {
   test('toggling persists across a client-side navigation', async ({ page }) => {
     await page.goto('/');
 
+    // The handler is attached when its module runs; clicking before that is a
+    // no-op. Waiting on the bound marker removes the race instead of sleeping.
+    await expect(page.locator('#theme-toggle')).toHaveAttribute('data-bound', 'true');
+
     const before = await page.evaluate(() =>
       document.documentElement.classList.contains('dark'),
     );

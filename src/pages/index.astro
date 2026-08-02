@@ -3,6 +3,7 @@ import { Image } from 'astro:assets';
 import ArrowLink from '../components/ArrowLink.astro';
 import Section from '../components/Section.astro';
 import Stat from '../components/Stat.astro';
+import Timeline from '../components/Timeline.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import portrait from '../assets/avinash-sadana.jpg';
 import { dateRange, getExperience, getPosts, getPrograms, getVentures } from '../lib/content';
@@ -31,17 +32,21 @@ const posts = (await getPosts()).slice(0, 2);
         <span class="reveal block text-accent" style="--reveal-delay: 90ms">Sadana</span>
       </h1>
 
+      <!-- Portrait crop rather than a square: taller reads as editorial, and the
+           offset gold rule behind it gives depth without adding decoration. -->
       <div class="reveal order-1 lg:order-2" style="--reveal-delay: 150ms">
-        <Image
-          src={portrait}
-          alt="Avinash Sadana"
-          width={620}
-          densities={[1, 2]}
-          quality={78}
-          loading="eager"
-          fetchpriority="high"
-          class="aspect-square w-40 rounded-2xl object-cover shadow-sm sm:w-48 lg:w-[19rem]"
-        />
+        <div class="portrait-frame">
+          <Image
+            src={portrait}
+            alt="Avinash Sadana"
+            width={640}
+            densities={[1, 2]}
+            quality={78}
+            loading="eager"
+            fetchpriority="high"
+            class="portrait-img w-44 sm:w-52 lg:w-[18rem]"
+          />
+        </div>
       </div>
     </div>
 
@@ -50,20 +55,22 @@ const posts = (await getPosts()).slice(0, 2);
         class="reveal max-w-xl font-display text-2xl leading-tight font-semibold tracking-tight text-balance text-ink lg:text-3xl"
         style="--reveal-delay: 150ms"
       >
-        I take processes apart, find where they stall, and put them back together.
+        I’ve never been good at doing only one thing.
       </p>
 
       <div class="reveal max-w-lg" style="--reveal-delay: 200ms">
         <p class="prose-body">
-          That’s the work: programme management and strategy support at a power
-          manufacturing startup, after procurement and supply chain inside heavy
-          engineering. What I actually enjoy is the layer underneath — the business
-          model a process exists to serve, and why some models compound while others
-          just spin.
+          Engineer by training, operator by trade. I run programme management and
+          strategy at TMA Drive, a startup manufacturing power quality solutions,
+          after procurement and supply chain inside heavy engineering — and I’m
+          finishing an MBA in International Business alongside it.
         </p>
         <p class="prose-body mt-4">
-          Outside it I founded a music festival and a pan-India cycling community, and
-          I race ultra-distance on a bike. I like living my life, not just planning it.
+          I also founded a music festival and a pan-India cycling community, race
+          ultra-distance on a bike, tell stories on stage, take photographs, write
+          the occasional poem, and read more than is strictly reasonable. The
+          through-line is the same everywhere: work out how the thing actually
+          works, then make it work better.
         </p>
 
         <div class="mt-8 flex flex-wrap items-center gap-3">
@@ -162,6 +169,16 @@ const posts = (await getPosts()).slice(0, 2);
         ))
       }
     </div>
+  </Section>
+
+  <!-- Everything at once -->
+  <Section
+    eyebrow="The whole picture"
+    title="Several things, mostly at the same time"
+    lead="Work, study, ventures, sport and the odd award — on parallel tracks, because that is how they actually happened. Hover or tap anything."
+    divider
+  >
+    <Timeline />
   </Section>
 
   <!-- Experience -->

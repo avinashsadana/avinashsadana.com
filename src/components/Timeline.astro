@@ -1,0 +1,279 @@
+---
+import { getTimeline } from '../lib/content';
+
+/**
+ * A graphical timeline of everything at once — work, study, ventures, sport and
+ * recognition on parallel tracks, so the overlap is the point: several of these
+ * were running simultaneously.
+ *
+ * Built from CSS grid over year columns rather than a charting library, so it
+ * costs nothing to load. Every bar is a real <button> with its detail already
+ * in the DOM: keyboard-navigable, screen-reader complete, and fully readable
+ * with JavaScript switched off (the panel below is a plain list without JS).
+ */
+
+const items = await getTimeline();
+
+const lanes = [
+  { key: 'work', label: 'Work' },
+  { key: 'education', label: 'Study' },
+  { key: 'ventures', label: 'Ventures' },
+  { key: 'sport', label: 'Sport' },
+  { key: 'creative', label: 'Recognition' },
+] as const;
+
+const thisYear = new Date().getFullYear();
+const firstYear = Math.min(...items.map((i) => i.data.startYear));
+const lastYear = Math.max(thisYear, ...items.map((i) => i.data.endYear ?? thisYear));
+const span = lastYear - firstYear + 1;
+const years = Array.from({ length: span }, (_, i) => firstYear + i);
+
+/** Grid columns are 1-indexed and the label column occupies the first one. */
+const colStart = (year: number) => year - firstYear + 2;
+const colEnd = (item: (typeof items)[number]) =>
+  (item.data.endYear ?? lastYear) - firstYear + 3;
+---
+
+<div class="timeline" data-timeline>
+  <!-- Year scale -->
+  <div class="tl-grid tl-scale" style={`--cols:${span}`}>
+    <span class="tl-lane-label" aria-hidden="true"></span>
+    {
+      years.map((y) => (
+        <span class="tl-year" style={`grid-column:${colStart(y)}`}>
+          {y === firstYear || y === lastYear || y % 2 === 0 ? `’${String(y).slice(2)}` : ''}
+        </span>
+      ))
+    }
+  </div>
+
+  {
+    lanes.map((lane) => {
+      const laneItems = items.filter((i) => i.data.lane === lane.key);
+      if (laneItems.length === 0) return null;
+      return (
+        <div class="tl-grid tl-row" style={`--cols:${span}`} data-lane={lane.key}>
+          <span class="tl-lane-label">{lane.label}</span>
+          {laneItems.map((item) => (
+            <button
+              type="button"
+              class="tl-bar"
+              data-tl-item={item.id}
+              style={`grid-column:${colStart(item.data.startYear)} / ${colEnd(item)}`}
+              aria-describedby={`tl-detail-${item.id}`}
+            >
+              <span class="tl-bar-text">{item.data.label}</span>
+              {!item.data.endYear && <span class="tl-live" aria-label="ongoing" />}
+            </button>
+          ))}
+        </div>
+      );
+    })
+  }
+
+  <!-- Detail panel. Rendered for every item so it works without JavaScript;
+       JS collapses it to one at a time and wires up the bars. -->
+  <div class="tl-details" data-tl-details>
+    {
+      items.map((item) => (
+        <div class="tl-detail" id={`tl-detail-${item.id}`} data-tl-detail={item.id}>
+          <p class="tl-detail-years">
+            {item.data.startYear}
+            {item.data.endYear
+              ? item.data.endYear !== item.data.startYear && ` — ${item.data.endYear}`
+              : ' — present'}
+          </p>
+          <p class="tl-detail-label">{item.data.label}</p>
+          <p class="tl-detail-text">{item.data.detail}</p>
+        </div>
+      ))
+    }
+  </div>
+</div>
+
+<script>
+  function initTimeline() {
+    const root = document.querySelector<HTMLElement>('[data-timeline]');
+    if (!root || root.dataset.bound === 'true') return;
+    root.dataset.bound = 'true';
+
+    const bars = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-tl-item]'));
+    const details = Array.from(root.querySelectorAll<HTMLElement>('[data-tl-detail]'));
+    if (!bars.length) return;
+
+    // Only now that JS is running does it make sense to show one at a time.
+    root.classList.add('tl-interactive');
+
+    const select = (id: string) => {
+      for (const bar of bars) bar.setAttribute('aria-current', String(bar.dataset.tlItem === id));
+      for (const d of details) d.toggleAttribute('hidden', d.dataset.tlDetail !== id);
+    };
+
+    for (const bar of bars) {
+      const id = bar.dataset.tlItem!;
+      bar.addEventListener('click', () => select(id));
+      bar.addEventListener('mouseenter', () => select(id));
+      bar.addEventListener('focus', () => select(id));
+    }
+
+    // Start on the most recent entry rather than an empty panel.
+    select(bars[bars.length - 1]!.dataset.tlItem!);
+  }
+
+  initTimeline();
+  document.addEventListener('astro:page-load', initTimeline);
+</script>
+
+<style>
+  .timeline {
+    --lane-w: 5.5rem;
+  }
+
+  .tl-grid {
+    display: grid;
+    grid-template-columns: var(--lane-w) repeat(var(--cols), minmax(0, 1fr));
+    align-items: center;
+    gap: 0 2px;
+  }
+
+  .tl-lane-label {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--c-text-subtle);
+  }
+
+  .tl-scale {
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--c-border);
+    margin-bottom: 0.75rem;
+  }
+
+  .tl-year {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: var(--c-text-subtle);
+    text-align: center;
+  }
+
+  .tl-row {
+    padding-block: 0.2rem;
+  }
+
+  .tl-bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-width: 0;
+    height: 1.9rem;
+    padding-inline: 0.6rem;
+    border: 1px solid var(--c-border);
+    border-radius: 6px;
+    background-color: var(--c-bg-sunken);
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--c-text-muted);
+    text-align: left;
+    cursor: pointer;
+    transition:
+      background-color 0.18s ease,
+      border-color 0.18s ease,
+      color 0.18s ease;
+  }
+
+  .tl-bar-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .tl-bar:hover,
+  .tl-bar[aria-current='true'] {
+    border-color: var(--c-border-strong);
+    background-color: var(--c-bg-raised);
+    color: var(--c-text);
+  }
+
+  /* The gold dot marks anything still running. */
+  .tl-live {
+    flex: none;
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 50%;
+    background-color: var(--c-gold);
+  }
+
+  .tl-details {
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--c-border);
+  }
+
+  /* Without JS every detail is listed; with JS one shows at a time. */
+  .tl-detail + .tl-detail {
+    margin-top: 1rem;
+  }
+
+  .tl-interactive .tl-details {
+    min-height: 5.5rem;
+  }
+
+  .tl-detail-years {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.1em;
+    color: var(--c-accent);
+  }
+
+  .tl-detail-label {
+    margin-top: 0.35rem;
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--c-text);
+  }
+
+  .tl-detail-text {
+    margin-top: 0.3rem;
+    max-width: 60ch;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--c-text-muted);
+  }
+
+  /* Below ~900px a 12-year grid stops being legible, so the whole thing
+     becomes a plain stacked list rather than a squashed chart. */
+  @media (max-width: 900px) {
+    .tl-scale {
+      display: none;
+    }
+
+    .tl-grid {
+      display: block;
+    }
+
+    .tl-lane-label {
+      display: block;
+      margin-top: 1.25rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .tl-bar {
+      width: 100%;
+      height: auto;
+      padding-block: 0.55rem;
+      margin-bottom: 0.3rem;
+      font-size: 0.8rem;
+    }
+
+    .tl-bar-text {
+      white-space: normal;
+    }
+
+    .tl-interactive .tl-details {
+      min-height: 7rem;
+    }
+  }
+</style>
