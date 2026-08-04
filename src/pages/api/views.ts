@@ -11,13 +11,16 @@ export const prerender = false;
 const ALLOWED_PATH = /^\/(?:[a-z0-9]+(?:-[a-z0-9]+)*(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)*)?$/;
 
 export const POST: APIRoute = async ({ request }) => {
-  if (!isSupabaseConfigured()) return json({ ok: true, count: null });
-
+  // Validation comes first, deliberately. A malformed request is malformed
+  // whether or not the database happens to be reachable, and answering 200 to
+  // a bad path just because the backend is down hides real client bugs.
   const body = await readJson(request);
   const raw = typeof body.path === 'string' ? body.path : '/';
   const path = (raw.split('?')[0]?.replace(/\/+$/, '') || '/').slice(0, 200);
 
   if (!ALLOWED_PATH.test(path)) return fail('Invalid path.', 422);
+
+  if (!isSupabaseConfigured()) return json({ ok: true, count: null });
 
   // The increment happens inside Postgres so two simultaneous requests cannot
   // read the same count and both write count + 1.

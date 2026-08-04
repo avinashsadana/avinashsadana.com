@@ -19,10 +19,6 @@ const RATE_LIMIT = 3;
 const WINDOW_MS = 60 * 60 * 1000;
 
 export const POST: APIRoute = async ({ request }) => {
-  if (!isSupabaseConfigured()) {
-    return fail('The contact form is not configured yet. Please email me directly.', 503);
-  }
-
   const body = await readJson(request);
 
   // Silently accept anything that looks automated. Telling a bot it failed just
@@ -39,6 +35,12 @@ export const POST: APIRoute = async ({ request }) => {
   if (name.length < 2) return fail('Please tell me your name.', 422, 'name');
   if (!isEmail(email)) return fail('That email address doesn’t look right.', 422, 'email');
   if (message.length < 10) return fail('Please write a slightly longer message.', 422, 'message');
+
+  // Only once the submission is known to be well-formed does it matter whether
+  // there is anywhere to put it.
+  if (!isSupabaseConfigured()) {
+    return fail('The contact form is not configured yet. Please email me directly.', 503);
+  }
 
   const supabase = getSupabase();
   const ipHash = hashIp(request);

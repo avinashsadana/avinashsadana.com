@@ -27,10 +27,6 @@ export const GET: APIRoute = async () => {
 };
 
 export const POST: APIRoute = async ({ request }) => {
-  if (!isSupabaseConfigured()) {
-    return fail('The guestbook is not configured yet.', 503);
-  }
-
   const body = await readJson(request);
 
   if (looksAutomated({ honeypot: body.website, elapsedMs: Number(body.elapsedMs) })) {
@@ -43,6 +39,10 @@ export const POST: APIRoute = async ({ request }) => {
 
   if (name.length < 2) return fail('Please add your name.', 422, 'name');
   if (message.length < 5) return fail('Please write a slightly longer note.', 422, 'message');
+
+  if (!isSupabaseConfigured()) {
+    return fail('The guestbook is not configured yet.', 503);
+  }
 
   const supabase = getSupabase();
   const ipHash = hashIp(request);

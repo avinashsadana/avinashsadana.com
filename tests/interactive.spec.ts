@@ -4,8 +4,15 @@ import { cleanup, contactMessageExists, db, guestbookEntry } from './helpers/db'
 /** Unique per run so assertions never collide with a previous run's rows. */
 const stamp = () => `pw-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-/** Database assertions are skipped when credentials are absent, never faked. */
+/**
+ * Tests that need a real backend are skipped when credentials are absent rather
+ * than failed. Without them the API routes correctly answer 503, so failing
+ * would only be reporting "CI has no database" over and over — which is true,
+ * expected, and not a defect in the site.
+ */
 const hasDb = () => db() !== null;
+const needsBackend = () =>
+  test.skip(!hasDb(), 'needs Supabase credentials — set them as repository secrets to run');
 
 test.describe('theme', () => {
   test('toggling persists across a client-side navigation', async ({ page }) => {
@@ -94,6 +101,7 @@ test.describe('contact form', () => {
   });
 
   test('submits successfully and stores the message', async ({ page }) => {
+    needsBackend();
     const marker = stamp();
     await page.goto('/contact');
 
@@ -115,12 +123,12 @@ test.describe('contact form', () => {
     await expect(page.locator('#name')).toHaveValue('');
 
     // Confirm it is genuinely persisted, not just optimistically reported.
-    test.skip(!hasDb(), 'needs Supabase credentials');
     expect(await contactMessageExists(marker), 'message row exists in the database').toBe(true);
     await cleanup(marker);
   });
 
   test('silently absorbs a honeypot submission without storing it', async ({ page }) => {
+    needsBackend();
     const marker = stamp();
     await page.goto('/contact');
 
@@ -140,7 +148,6 @@ test.describe('contact form', () => {
     // The bot is told everything is fine — telling it otherwise teaches it.
     expect(response.status()).toBe(200);
 
-    test.skip(!hasDb(), 'needs Supabase credentials');
     expect(await contactMessageExists(marker), 'honeypot submission was NOT stored').toBe(false);
   });
 });
@@ -150,6 +157,7 @@ test.describe('guestbook', () => {
     page,
     request,
   }) => {
+    needsBackend();
     const marker = stamp();
     await page.goto('/guestbook');
 
@@ -177,7 +185,6 @@ test.describe('guestbook', () => {
     await expect(page.locator('body')).not.toContainText(marker);
 
     // And confirm the row exists but is flagged unapproved.
-    test.skip(!hasDb(), 'needs Supabase credentials');
     const row = await guestbookEntry(marker);
     expect(row, 'entry was stored').toBeTruthy();
     expect(row!.approved, 'entry is stored unapproved').toBe(false);
@@ -187,6 +194,7 @@ test.describe('guestbook', () => {
 
 test.describe('view counter', () => {
   test('increments and renders a number', async ({ page }) => {
+    needsBackend();
     await page.goto('/about');
 
     const response = await page.waitForResponse((r) => r.url().includes('/api/views'));
@@ -243,6 +251,7 @@ test.describe('api hardening', () => {
   });
 
   test('admin login rejects a wrong password', async ({ request }) => {
+    test.skip(!process.env.ADMIN_PASSWORD, 'needs ADMIN_PASSWORD set');
     const response = await request.post('/api/admin/login', {
       data: { password: 'definitely-not-the-password' },
       failOnStatusCode: false,
