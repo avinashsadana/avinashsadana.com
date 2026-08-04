@@ -1,12 +1,11 @@
 ---
-import { Image } from 'astro:assets';
 import ArrowLink from '../components/ArrowLink.astro';
+import Portrait from '../components/Portrait.astro';
 import PageHeader from '../components/PageHeader.astro';
 import Section from '../components/Section.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getAchievements, getCertifications, getEducation } from '../lib/content';
 import { socials } from '../site.config';
-import portrait from '../assets/avinash-sadana.jpg';
 
 const education = await getEducation();
 const certifications = await getCertifications();
@@ -94,16 +93,7 @@ const categories = [
       </div>
 
       <aside class="reveal space-y-10" style="--reveal-delay: 100ms">
-        <div class="portrait-frame">
-          <Image
-            src={portrait}
-            alt="Avinash Sadana"
-            width={760}
-            densities={[1, 2]}
-            quality={78}
-            class="portrait-img w-full max-w-[19rem]"
-          />
-        </div>
+        <Portrait class="w-full max-w-[19rem]" width={760} />
 
         <div>
           <h2 class="eyebrow">Based in</h2>

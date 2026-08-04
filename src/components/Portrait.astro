@@ -1,0 +1,182 @@
+---
+import { Image } from 'astro:assets';
+import portrait from '../assets/avinash-sadana.jpg';
+
+/**
+ * The portrait, marked by two unbroken strokes.
+ *
+ * Replaces an offset drop-shadow border, which was a borrowed trick, and then a
+ * closed gold rectangle, which just read as a picture frame. What is here now
+ * comes from the logo system: "avinash" means imperishable, unbroken, and the
+ * mark is a single continuous stroke. These are two of them.
+ *
+ * Why it holds a viewer rather than decorating:
+ *   - the brackets are deliberately incomplete, and a nearly-closed shape pulls
+ *     the eye into finishing it (Gestalt closure) instead of being dismissed;
+ *   - they draw in sequence on arrival, so the frame arrives as one gesture —
+ *     motion that resolves is far harder to look away from than motion that loops;
+ *   - they keep drifting against the photograph as you scroll, so the composition
+ *     never settles into furniture;
+ *   - hovering opens them further, which rewards the first person who points at it.
+ *
+ * `pathLength="1"` normalises each path so the dash maths is exact at any
+ * rendered size — no magic numbers to re-measure if the crop ever changes.
+ */
+
+interface Props {
+  /** Rendered width class, e.g. "w-40 sm:w-52 lg:w-[18rem]". */
+  class?: string;
+  width?: number;
+  eager?: boolean;
+}
+
+const { class: className = '', width = 640, eager = false } = Astro.props;
+---
+
+<div class:list={['portrait', className]}>
+  <Image
+    src={portrait}
+    alt="Avinash Sadana"
+    width={width}
+    densities={[1, 2]}
+    quality={78}
+    loading={eager ? 'eager' : 'lazy'}
+    {...eager ? { fetchpriority: 'high' as const } : {}}
+    class="portrait-photo"
+  />
+
+  <svg class="portrait-line" viewBox="0 0 400 500" fill="none" aria-hidden="true">
+    <!-- Two long brackets, each one unbroken stroke, deliberately leaving the
+         opposite corners open. A closed rectangle around a photograph is a
+         picture frame; an open one is a mark, and the eye closes it itself. -->
+    <path
+      class="portrait-bracket"
+      pathLength="1"
+      d="M18 250 L18 26 A18 18 0 0 1 36 8 L232 8"
+    ></path>
+    <path
+      class="portrait-bracket portrait-bracket-b"
+      pathLength="1"
+      d="M382 250 L382 474 A18 18 0 0 1 364 492 L168 492"
+    ></path>
+  </svg>
+</div>
+
+<style>
+  .portrait {
+    position: relative;
+    display: block;
+    isolation: isolate;
+  }
+
+  .portrait-photo {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    border-radius: 14px;
+    object-fit: cover;
+    /* Biases the crop upward so the face sits in the top half, not dead centre. */
+    object-position: 50% 22%;
+  }
+
+  /* The frame sits slightly outside the photo so the line reads as drawn
+     around it rather than printed on it. */
+  .portrait-line {
+    position: absolute;
+    inset: -18px;
+    width: calc(100% + 36px);
+    height: calc(100% + 36px);
+    pointer-events: none;
+    overflow: visible;
+  }
+
+  .portrait-bracket {
+    stroke: var(--c-gold);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: draw-bracket 1.1s cubic-bezier(0.65, 0, 0.35, 1) 0.2s forwards;
+  }
+
+  /* The second bracket follows the first, so the two read as one gesture
+     rather than as a border appearing all at once. */
+  .portrait-bracket-b {
+    animation-delay: 0.45s;
+  }
+
+  @keyframes draw-bracket {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  /* Scroll-linked: once drawn, the dash pattern travels as the page moves, so
+     the line keeps its sense of being a single stroke still in motion.
+     Runs on the compositor via `view()` — no scroll listener, no jank. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .portrait-photo {
+        animation: portrait-drift linear both;
+        animation-timeline: view();
+        animation-range: entry 15% exit 85%;
+      }
+
+      .portrait-line {
+        animation: frame-travel linear both;
+        animation-timeline: view();
+        animation-range: entry 15% exit 85%;
+      }
+    }
+  }
+
+  @keyframes portrait-drift {
+    from {
+      translate: 0 1.5rem;
+      scale: 1.02;
+    }
+    to {
+      translate: 0 -1.5rem;
+      scale: 1;
+    }
+  }
+
+  @keyframes frame-travel {
+    from {
+      translate: 0 1.9rem;
+      rotate: -0.4deg;
+    }
+    to {
+      translate: 0 -1.9rem;
+      rotate: 0.4deg;
+    }
+  }
+
+  /* A small reward for pointing at it: the frame breathes outward. */
+  @media (hover: hover) {
+    .portrait-line {
+      transition: inset 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .portrait:hover .portrait-line {
+      inset: -26px;
+      width: calc(100% + 52px);
+      height: calc(100% + 52px);
+    }
+  }
+
+  /* Nothing moves, and the frame is simply already complete. */
+  @media (prefers-reduced-motion: reduce) {
+    .portrait-bracket {
+      animation: none;
+      stroke-dashoffset: 0;
+    }
+
+    .portrait:hover .portrait-line {
+      inset: -18px;
+      width: calc(100% + 36px);
+      height: calc(100% + 36px);
+    }
+  }
+</style>

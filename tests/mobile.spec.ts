@@ -57,7 +57,9 @@ test.describe('mobile: hierarchy and readability', () => {
 
     const nameFirst = await page.evaluate(() => {
       const h1 = document.querySelector('main h1');
-      const img = document.querySelector('.portrait-img');
+      // The wrapper, not the <img> class — the image's own class has changed
+      // twice during design work and this assertion should not track that.
+      const img = document.querySelector('main .portrait');
       if (!h1 || !img) return null;
       // 4 === DOCUMENT_POSITION_FOLLOWING: the image comes after the heading.
       return Boolean(h1.compareDocumentPosition(img) & Node.DOCUMENT_POSITION_FOLLOWING);

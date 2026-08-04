@@ -1,11 +1,10 @@
 ---
-import { Image } from 'astro:assets';
 import ArrowLink from '../components/ArrowLink.astro';
 import Facets from '../components/Facets.astro';
+import Portrait from '../components/Portrait.astro';
 import Section from '../components/Section.astro';
 import Timeline from '../components/Timeline.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import portrait from '../assets/avinash-sadana.jpg';
 import { dateRange, getPosts, getVentures } from '../lib/content';
 import { site } from '../site.config';
 
@@ -27,18 +26,7 @@ const posts = (await getPosts()).slice(0, 3);
       </h1>
 
       <div class="reveal" style="--reveal-delay: 150ms">
-        <div class="portrait-frame">
-          <Image
-            src={portrait}
-            alt="Avinash Sadana"
-            width={640}
-            densities={[1, 2]}
-            quality={78}
-            loading="eager"
-            fetchpriority="high"
-            class="portrait-img w-40 sm:w-52 lg:w-[18rem]"
-          />
-        </div>
+        <Portrait class="w-40 sm:w-52 lg:w-[18rem]" width={640} eager />
       </div>
     </div>
 
