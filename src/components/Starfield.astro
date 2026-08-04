@@ -1,0 +1,112 @@
+---
+/**
+ * A very faint field of stars behind the whole site.
+ *
+ * Deliberately restrained: no animation loop, no canvas, no DOM nodes per star.
+ * It is one fixed element painted with layered radial gradients, so it costs
+ * nothing to render and cannot be scrolled out of sync with anything.
+ *
+ * In dark mode it reads as a night sky. In light mode the same points sit at a
+ * fraction of the opacity and read as paper grain rather than stars — which is
+ * the honest way to carry a motif across a light theme without it looking
+ * pasted on.
+ *
+ * It drifts fractionally as the page scrolls, on the compositor via
+ * `animation-timeline: scroll()`. Two layers at different rates give depth
+ * without anything obviously "moving".
+ */
+---
+
+<div class="starfield" aria-hidden="true">
+  <div class="star-layer star-layer-far"></div>
+  <div class="star-layer star-layer-near"></div>
+</div>
+
+<style>
+  .starfield {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    /* Behind every section, which all sit in the normal flow above it. */
+    isolation: isolate;
+  }
+
+  .star-layer {
+    position: absolute;
+    inset: -10% 0;
+    background-repeat: repeat;
+  }
+
+  /* Two sizes, two densities. Positions are hand-placed rather than random so
+     the field never clusters awkwardly or leaves an obvious empty quadrant. */
+  .star-layer-far {
+    opacity: var(--star-far-opacity);
+    background-image:
+      radial-gradient(1px 1px at 12% 18%, var(--star-ink) 50%, transparent 50%),
+      radial-gradient(1px 1px at 84% 9%, var(--star-ink) 50%, transparent 50%),
+      radial-gradient(1px 1px at 33% 62%, var(--star-ink) 50%, transparent 50%),
+      radial-gradient(1px 1px at 68% 44%, var(--star-ink) 50%, transparent 50%),
+      radial-gradient(1px 1px at 91% 71%, var(--star-ink) 50%, transparent 50%),
+      radial-gradient(1px 1px at 7% 83%, var(--star-ink) 50%, transparent 50%),
+      radial-gradient(1px 1px at 52% 27%, var(--star-ink) 50%, transparent 50%),
+      radial-gradient(1px 1px at 24% 39%, var(--star-ink) 50%, transparent 50%),
+      radial-gradient(1px 1px at 76% 88%, var(--star-ink) 50%, transparent 50%),
+      radial-gradient(1px 1px at 44% 94%, var(--star-ink) 50%, transparent 50%);
+    background-size: 100% 62rem;
+  }
+
+  .star-layer-near {
+    opacity: var(--star-near-opacity);
+    background-image:
+      radial-gradient(1.6px 1.6px at 21% 31%, var(--star-gold) 50%, transparent 50%),
+      radial-gradient(1.4px 1.4px at 63% 12%, var(--star-ink) 50%, transparent 50%),
+      radial-gradient(1.6px 1.6px at 88% 52%, var(--star-gold) 50%, transparent 50%),
+      radial-gradient(1.4px 1.4px at 39% 77%, var(--star-ink) 50%, transparent 50%),
+      radial-gradient(1.5px 1.5px at 14% 58%, var(--star-gold) 50%, transparent 50%);
+    background-size: 100% 47rem;
+  }
+
+  :root {
+    --star-ink: #22252a;
+    --star-gold: #c08a2e;
+    /* Barely perceptible on paper — texture, not decoration. */
+    --star-far-opacity: 0.09;
+    --star-near-opacity: 0.13;
+  }
+
+  :global(.dark) .starfield {
+    --star-ink: #f7f6f3;
+    --star-gold: #d2a04a;
+    --star-far-opacity: 0.3;
+    --star-near-opacity: 0.42;
+  }
+
+  /* Parallax: the near layer travels faster than the far one, which is what
+     makes a flat field read as depth. */
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .star-layer-far {
+        animation: drift-far linear both;
+        animation-timeline: scroll();
+      }
+
+      .star-layer-near {
+        animation: drift-near linear both;
+        animation-timeline: scroll();
+      }
+    }
+  }
+
+  @keyframes drift-far {
+    to {
+      translate: 0 -3%;
+    }
+  }
+
+  @keyframes drift-near {
+    to {
+      translate: 0 -8%;
+    }
+  }
+</style>

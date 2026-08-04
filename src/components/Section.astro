@@ -16,7 +16,7 @@ const { eyebrow, title, lead, id, divider = false, class: className } = Astro.pr
   id={id}
   class:list={[
     'shell scroll-mt-24 py-10 lg:py-20',
-    divider && 'border-t border-line',
+    divider && 'section-rule border-t border-line',
     className,
   ]}
 >
@@ -45,3 +45,29 @@ const { eyebrow, title, lead, id, divider = false, class: className } = Astro.pr
     <slot />
   </div>
 </section>
+
+<style>
+  /* The rule between sections carries a single point of light where the
+     content column begins — a horizon with one star on it. Nothing more:
+     the motif has to survive being repeated on every page. */
+  .section-rule {
+    position: relative;
+  }
+
+  .section-rule::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: 1.5rem;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: var(--c-gold);
+  }
+
+  @media (min-width: 1024px) {
+    .section-rule::before {
+      left: 3rem;
+    }
+  }
+</style>

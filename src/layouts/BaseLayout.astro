@@ -4,6 +4,7 @@ import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import Preloader from '../components/Preloader.astro';
 import Seo from '../components/Seo.astro';
+import Starfield from '../components/Starfield.astro';
 import { site, socials } from '../site.config';
 import '../styles/global.css';
 
@@ -118,6 +119,7 @@ const websiteSchema = {
   </head>
 
   <body class="min-h-dvh">
+    <Starfield />
     <Preloader />
 
     <a
@@ -129,7 +131,7 @@ const websiteSchema = {
 
     <Header />
 
-    <main id="main">
+    <main id="main" class="relative z-10">
       <slot />
     </main>
 
