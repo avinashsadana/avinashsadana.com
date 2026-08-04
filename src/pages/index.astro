@@ -15,16 +15,18 @@ const posts = (await getPosts()).slice(0, 3);
 
 <BaseLayout title={site.name} description={site.description}>
   <!-- Hero. Deliberately short: a name, one line, a face, and a way in. -->
-  <section class="shell pt-14 pb-16 lg:pt-24 lg:pb-20">
+  <section class="shell pt-8 pb-12 lg:pt-24 lg:pb-20">
     <p class="eyebrow reveal">Pune, India · Open to opportunities</p>
 
-    <div class="mt-7 grid items-end gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-12">
-      <h1 class="order-2 font-display text-display font-bold text-ink lg:order-1">
+    <!-- The name leads on every screen. On mobile the portrait previously sat
+         above it, so the first thing on a phone was a photo of an unnamed man. -->
+    <div class="mt-6 grid items-end gap-6 lg:mt-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-12">
+      <h1 class="font-display text-display font-bold text-ink">
         <span class="reveal block">Avinash</span>
         <span class="reveal block text-accent" style="--reveal-delay: 90ms">Sadana</span>
       </h1>
 
-      <div class="reveal order-1 lg:order-2" style="--reveal-delay: 150ms">
+      <div class="reveal" style="--reveal-delay: 150ms">
         <div class="portrait-frame">
           <Image
             src={portrait}
@@ -34,7 +36,7 @@ const posts = (await getPosts()).slice(0, 3);
             quality={78}
             loading="eager"
             fetchpriority="high"
-            class="portrait-img w-44 sm:w-52 lg:w-[18rem]"
+            class="portrait-img w-40 sm:w-52 lg:w-[18rem]"
           />
         </div>
       </div>
@@ -43,14 +45,14 @@ const posts = (await getPosts()).slice(0, 3);
     <!-- Two beats: the setup sits back, the claim lands. Both are one <p> so
          screen readers and search engines read it as the single sentence it is. -->
     <p
-      class="reveal mt-12 max-w-3xl font-display text-2xl leading-snug font-semibold tracking-tight text-balance lg:mt-16 lg:text-4xl"
+      class="reveal mt-9 max-w-3xl font-display text-2xl leading-snug font-semibold tracking-tight text-balance lg:mt-16 lg:text-4xl"
       style="--reveal-delay: 180ms"
     >
       <span class="block text-subtle">Good ideas are everywhere.</span>
       <span class="block text-ink">I make them work.</span>
     </p>
 
-    <div class="reveal mt-8 flex flex-wrap items-center gap-3" style="--reveal-delay: 240ms">
+    <div class="reveal mt-7 flex flex-wrap items-center gap-3" style="--reveal-delay: 240ms">
       <a href="/work" class="btn-primary">
         See the work
         <svg

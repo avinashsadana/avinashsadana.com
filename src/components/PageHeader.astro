@@ -10,17 +10,17 @@ const { eyebrow, title, lead } = Astro.props;
 
 <!-- Bottom padding is deliberately small: the following <Section> supplies the
      gap, and doubling both left an awkward void under every page title. -->
-<section class="shell pt-16 pb-2 lg:pt-24 lg:pb-4">
+<section class="shell pt-9 pb-1 lg:pt-24 lg:pb-4">
   <p class="eyebrow reveal">{eyebrow}</p>
   <h1
-    class="reveal mt-5 font-display text-hero font-bold text-ink"
+    class="reveal mt-4 font-display text-hero font-bold text-ink lg:mt-5"
     style="--reveal-delay: 60ms"
   >
     {title}
   </h1>
   {
     lead && (
-      <p class="prose-body reveal mt-6 text-lg" style="--reveal-delay: 120ms">
+      <p class="prose-body reveal mt-5 text-base lg:mt-6 lg:text-lg" style="--reveal-delay: 120ms">
         {lead}
       </p>
     )

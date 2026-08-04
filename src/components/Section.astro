@@ -15,7 +15,7 @@ const { eyebrow, title, lead, id, divider = false, class: className } = Astro.pr
 <section
   id={id}
   class:list={[
-    'shell scroll-mt-24 py-14 lg:py-20',
+    'shell scroll-mt-24 py-10 lg:py-20',
     divider && 'border-t border-line',
     className,
   ]}
@@ -41,7 +41,7 @@ const { eyebrow, title, lead, id, divider = false, class: className } = Astro.pr
     )
   }
 
-  <div class:list={[(eyebrow || title || lead) && 'mt-10 lg:mt-12']}>
+  <div class:list={[(eyebrow || title || lead) && 'mt-7 lg:mt-12']}>
     <slot />
   </div>
 </section>

@@ -19,7 +19,7 @@ const lanes = [
   { key: 'education', label: 'Study' },
   { key: 'ventures', label: 'Ventures' },
   { key: 'sport', label: 'Sport' },
-  { key: 'creative', label: 'Recognition' },
+  { key: 'creative', label: 'Awards' },
 ] as const;
 
 const thisYear = new Date().getFullYear();
@@ -35,6 +35,8 @@ const colEnd = (item: (typeof items)[number]) =>
 ---
 
 <div class="timeline" data-timeline>
+  <div class="tl-scroll">
+    <div class="tl-chart">
   <!-- Year scale -->
   <div class="tl-grid tl-scale" style={`--cols:${span}`}>
     <span class="tl-lane-label" aria-hidden="true"></span>
@@ -70,6 +72,10 @@ const colEnd = (item: (typeof items)[number]) =>
       );
     })
   }
+
+    </div>
+  </div>
+  <p class="tl-hint" aria-hidden="true">Swipe the chart →</p>
 
   <!-- Detail panel. Rendered for every item so it works without JavaScript;
        JS collapses it to one at a time and wires up the bars. -->
@@ -118,6 +124,14 @@ const colEnd = (item: (typeof items)[number]) =>
 
     // Start on the most recent entry rather than an empty panel.
     select(bars[bars.length - 1]!.dataset.tlItem!);
+
+    // On a phone the chart is wider than the screen. Opening at the left edge
+    // shows 2015, which is almost empty; open at the present instead, where
+    // everything actually is.
+    const scroller = root.querySelector<HTMLElement>('.tl-scroll');
+    if (scroller && scroller.scrollWidth > scroller.clientWidth) {
+      scroller.scrollLeft = scroller.scrollWidth;
+    }
   }
 
   initTimeline();
@@ -138,7 +152,7 @@ const colEnd = (item: (typeof items)[number]) =>
 
   .tl-lane-label {
     font-family: var(--font-mono);
-    font-size: 0.62rem;
+    font-size: 0.7rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--c-text-subtle);
@@ -152,7 +166,7 @@ const colEnd = (item: (typeof items)[number]) =>
 
   .tl-year {
     font-family: var(--font-mono);
-    font-size: 0.6rem;
+    font-size: 0.68rem;
     color: var(--c-text-subtle);
     text-align: center;
   }
@@ -167,12 +181,12 @@ const colEnd = (item: (typeof items)[number]) =>
     align-items: center;
     gap: 0.35rem;
     min-width: 0;
-    height: 1.9rem;
+    height: 2.05rem;
     padding-inline: 0.6rem;
     border: 1px solid var(--c-border);
     border-radius: 6px;
     background-color: var(--c-bg-sunken);
-    font-size: 0.72rem;
+    font-size: 0.78rem;
     font-weight: 500;
     color: var(--c-text-muted);
     text-align: left;
@@ -222,7 +236,7 @@ const colEnd = (item: (typeof items)[number]) =>
 
   .tl-detail-years {
     font-family: var(--font-mono);
-    font-size: 0.66rem;
+    font-size: 0.72rem;
     letter-spacing: 0.1em;
     color: var(--c-accent);
   }
@@ -243,33 +257,53 @@ const colEnd = (item: (typeof items)[number]) =>
     color: var(--c-text-muted);
   }
 
-  /* Below ~900px a 12-year grid stops being legible, so the whole thing
-     becomes a plain stacked list rather than a squashed chart. */
+  /* On a phone the chart is preserved and scrolled sideways rather than
+     collapsed into a list. Collapsing threw away the year scale, the bar
+     proportions and the overlap between tracks — which is the entire point of
+     drawing it. A 44rem minimum keeps twelve years legible. */
+  .tl-scroll {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scroll-snap-type: x proximity;
+  }
+
+  .tl-chart {
+    /* Wide enough that a single-year bar still fits a few readable characters.
+       At 44rem they truncated to "To…" and "T…", which told a reader nothing. */
+    min-width: 56rem;
+  }
+
+  .tl-hint {
+    display: none;
+    margin-top: 0.7rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--c-text-subtle);
+  }
+
   @media (max-width: 900px) {
-    .tl-scale {
-      display: none;
-    }
-
-    .tl-grid {
+    .tl-hint {
       display: block;
     }
 
+    /* Lane labels stay pinned while the chart scrolls under them, so you never
+       lose track of which row you are reading. */
     .tl-lane-label {
-      display: block;
-      margin-top: 1.25rem;
-      margin-bottom: 0.4rem;
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      background-color: var(--c-bg);
+      box-shadow: 0.5rem 0 0.5rem -0.4rem var(--c-bg);
+      padding-right: 0.5rem;
+      letter-spacing: 0.07em;
     }
 
-    .tl-bar {
-      width: 100%;
-      height: auto;
-      padding-block: 0.55rem;
-      margin-bottom: 0.3rem;
-      font-size: 0.8rem;
-    }
-
-    .tl-bar-text {
-      white-space: normal;
+    .timeline {
+      --lane-w: 5.6rem;
     }
 
     .tl-interactive .tl-details {

@@ -28,9 +28,13 @@ export default defineConfig({
       name: 'desktop',
       use: { ...devices['Desktop Chrome'] },
       // Mobile-layout assertions belong to the mobile project only.
-      testIgnore: /responsive\.spec\.ts/,
+      testIgnore: /(responsive|mobile)\.spec\.ts/,
     },
-    { name: 'mobile', use: { ...devices['iPhone 14'] }, testMatch: /responsive\.spec\.ts/ },
+    {
+      name: 'mobile',
+      use: { ...devices['iPhone 14'] },
+      testMatch: /(responsive|mobile)\.spec\.ts/,
+    },
   ],
   webServer: {
     // `--ignore-lock` so a background dev server on another port cannot make
