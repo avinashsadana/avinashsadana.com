@@ -2,7 +2,8 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { isAdminConfigured, isSignedIn } from '../lib/admin';
 import { getSupabase, isSupabaseConfigured } from '../lib/supabase';
-import { getDraftPosts, getPublishedPosts } from '../lib/content';
+import Writer from '../components/Writer.astro';
+import { getDraftPosts, getPublishedPosts } from '../lib/posts';
 
 export const prerender = false;
 
@@ -156,6 +157,10 @@ const when = (value: string) =>
             </button>
           </div>
 
+          <div class="mt-12">
+            <Writer drafts={drafts} published={posts} />
+          </div>
+
           {/* Guestbook moderation — pending first, because that is the work. */}
           <section class="mt-14">
             <h2 class="eyebrow">Guestbook · awaiting review ({pending.length})</h2>
@@ -234,28 +239,6 @@ const when = (value: string) =>
           </section>
 
           <section class="mt-16">
-            <h2 class="eyebrow">In review ({drafts.length})</h2>
-
-            {drafts.length === 0 ? (
-              <p class="prose-body mt-5 text-[0.95rem]">
-                Nothing waiting. Anything marked <code>draft: true</code> shows up here.
-              </p>
-            ) : (
-              <ul class="mt-6 space-y-3">
-                {drafts.map((draft) => (
-                  <li class="rounded-xl border border-accent/40 bg-bg-raised px-5 py-4">
-                    <p class="text-sm font-semibold text-ink">{draft.data.title}</p>
-                    <p class="mt-1 text-xs text-muted">{draft.data.description}</p>
-                    <p class="mt-2 font-mono text-xs text-subtle">
-                      src/content/writing/{draft.id}.md
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          <section class="mt-16">
             <h2 class="eyebrow">Send a newsletter</h2>
 
             {confirmed.length === 0 ? (
@@ -265,12 +248,12 @@ const when = (value: string) =>
             ) : (
               <ul class="mt-6 space-y-3">
                 {posts.map((post) => {
-                  const record = sendBySlug.get(post.id);
+                  const record = sendBySlug.get(post.slug);
                   const done = record?.status === 'sent';
                   return (
                     <li class="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-line bg-bg-raised px-5 py-4">
                       <div class="min-w-0">
-                        <p class="text-sm font-semibold text-ink">{post.data.title}</p>
+                        <p class="text-sm font-semibold text-ink">{post.title}</p>
                         <p class="mt-0.5 text-xs text-subtle">
                           {done
                             ? `Sent to ${record?.sent_count ?? 0} on ${new Date(record!.sent_at!).toLocaleDateString('en-GB')}`
@@ -287,7 +270,7 @@ const when = (value: string) =>
                         <button
                           type="button"
                           class="btn-primary shrink-0 px-5 py-2 text-xs"
-                          data-newsletter-preview={post.id}
+                          data-newsletter-preview={post.slug}
                         >
                           Preview & send
                         </button>

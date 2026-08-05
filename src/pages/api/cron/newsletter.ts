@@ -3,7 +3,7 @@ import type { APIRoute } from 'astro';
 import { fail, json } from '../../../lib/api';
 import { env } from '../../../lib/env';
 import { getSupabase, isSupabaseConfigured } from '../../../lib/supabase';
-import { getPublishedPosts } from '../../../lib/content';
+import { getPublishedPosts } from '../../../lib/posts';
 import { site } from '../../../site.config';
 
 export const prerender = false;
@@ -54,7 +54,7 @@ export const GET: APIRoute = async ({ request }) => {
   const cutoff = Date.now() - RECENT_DAYS * 24 * 60 * 60 * 1000;
 
   const pending = posts.filter(
-    (post) => !already.has(post.id) && post.data.pubDate.getTime() >= cutoff,
+    (post) => !already.has(post.slug) && post.pubDate.getTime() >= cutoff,
   );
 
   if (pending.length === 0) {
@@ -71,7 +71,7 @@ export const GET: APIRoute = async ({ request }) => {
 
   const { error: insertError } = await supabase
     .from('newsletter_sends')
-    .insert({ post_slug: post.id, subject: post.data.title, status: 'draft' });
+    .insert({ post_slug: post.slug, subject: post.title, status: 'draft' });
 
   if (insertError) {
     // Most likely the unique index caught a concurrent run. Not an error worth
@@ -93,9 +93,9 @@ export const GET: APIRoute = async ({ request }) => {
       .send({
         from,
         to,
-        subject: `Ready to send: ${post.data.title}`,
+        subject: `Ready to send: ${post.title}`,
         text: [
-          `"${post.data.title}" is published and has not been mailed yet.`,
+          `"${post.title}" is published and has not been mailed yet.`,
           '',
           `Subscribers: ${count ?? 0}`,
           '',
@@ -110,5 +110,5 @@ export const GET: APIRoute = async ({ request }) => {
       });
   }
 
-  return json({ ok: true, prepared: 1, slug: post.id, subscribers: count ?? 0 });
+  return json({ ok: true, prepared: 1, slug: post.slug, subscribers: count ?? 0 });
 };

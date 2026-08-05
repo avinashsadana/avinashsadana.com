@@ -117,12 +117,17 @@ test.describe('cross-origin protection', () => {
 });
 
 test.describe('drafts stay private', () => {
-  test('a draft never appears in the public feed', async ({ request }) => {
-    const response = await request.get('/rss.xml');
-    const body = await response.text();
-    // The feed is what reaches subscribers and aggregators. Even in an
-    // environment where drafts are visible on the site, they must not be here.
-    expect(body).not.toContain('Draft');
+  test('a draft never appears in the public feed or listing', async ({ request }) => {
+    // Articles live in the database now, so this is the check that matters:
+    // every item the feed carries must also be on the public writing page.
+    const feed = await (await request.get('/rss.xml')).text();
+    const listing = await (await request.get('/writing')).text();
+
+    for (const title of [...feed.matchAll(/<title><!\[CDATA\[(.*?)\]\]><\/title>/g)]
+      .map((m) => m[1])
+      .slice(1)) {
+      expect(listing, `"${title}" is in the feed but not on /writing`).toContain(title);
+    }
   });
 
   test('the send endpoint will not accept a draft', async ({ request }) => {
@@ -133,5 +138,22 @@ test.describe('drafts stay private', () => {
       failOnStatusCode: false,
     });
     expect(response.status()).toBe(401);
+  });
+});
+
+test.describe('writing from /admin', () => {
+  test('the posts endpoint refuses an unauthenticated caller', async ({ request }) => {
+    for (const action of ['save', 'publish', 'unpublish', 'delete']) {
+      const response = await request.post('/api/admin/posts', {
+        data: { action, slug: 'anything', title: 'Injected', body: 'nope' },
+        failOnStatusCode: false,
+      });
+      expect(response.status(), `${action} must require sign-in`).toBe(401);
+    }
+  });
+
+  test('a draft is not reachable from the public listing', async ({ request }) => {
+    const listing = await (await request.get('/writing')).text();
+    expect(listing).not.toContain('Draft — visible by link');
   });
 });

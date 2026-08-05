@@ -86,18 +86,6 @@ const endurance = defineCollection({
   }),
 });
 
-const writing = defineCollection({
-  loader: glob({ base: './src/content/writing', pattern: '**/*.{md,mdx}' }),
-  schema: z.object({
-    title: z.string(),
-    description: z.string(),
-    pubDate: z.coerce.date(),
-    updatedDate: z.coerce.date().optional(),
-    tags: z.array(z.string()).default([]),
-    draft: z.boolean().default(false),
-  }),
-});
-
 const capabilities = defineCollection({
   loader: file('src/content/data/capabilities.yaml'),
   schema: z.object({
@@ -180,7 +168,6 @@ export const collections = {
   programs,
   ventures,
   endurance,
-  writing,
   capabilities,
   certifications,
   education,

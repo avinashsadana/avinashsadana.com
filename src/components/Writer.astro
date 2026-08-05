@@ -1,0 +1,308 @@
+---
+import type { Post } from '../lib/posts';
+
+interface Props {
+  drafts: Post[];
+  published: Post[];
+}
+
+const { drafts, published } = Astro.props;
+const all = [...drafts, ...published];
+---
+
+<section class="writer" data-writer>
+  <div class="writer-head">
+    <h2 class="eyebrow">Write</h2>
+    {
+      all.length > 0 && (
+        <select class="writer-select" data-writer-open aria-label="Open an existing article">
+          <option value="">New article…</option>
+          {drafts.length > 0 && (
+            <optgroup label="Drafts">
+              {drafts.map((post) => (
+                <option value={post.slug}>{post.title}</option>
+              ))}
+            </optgroup>
+          )}
+          {published.length > 0 && (
+            <optgroup label="Published">
+              {published.map((post) => (
+                <option value={post.slug}>{post.title}</option>
+              ))}
+            </optgroup>
+          )}
+        </select>
+      )
+    }
+  </div>
+
+  <form class="writer-form" data-writer-form novalidate>
+    <input type="hidden" data-writer-slug value="" />
+
+    <label class="writer-label" for="writer-title">Title</label>
+    <input
+      id="writer-title"
+      class="writer-input writer-title"
+      type="text"
+      maxlength="200"
+      placeholder="What procurement taught me about saying no"
+      autocomplete="off"
+    />
+
+    <label class="writer-label" for="writer-body">Your article</label>
+    <textarea
+      id="writer-body"
+      class="writer-input writer-body"
+      rows="18"
+      placeholder="Just type. Leave a blank line between paragraphs.&#10;&#10;Start a line with ## to make a heading.&#10;Start a line with - to make a bullet."></textarea>
+
+    <details class="writer-more">
+      <summary>Summary and tags (optional)</summary>
+      <label class="writer-label" for="writer-description">
+        Summary — shown on the writing page and in the newsletter. Left blank, I take
+        your opening lines.
+      </label>
+      <textarea
+        id="writer-description"
+        class="writer-input"
+        rows="2"
+        maxlength="400"></textarea>
+
+      <label class="writer-label" for="writer-tags">Tags, separated by commas</label>
+      <input
+        id="writer-tags"
+        class="writer-input"
+        type="text"
+        placeholder="Operations, Business Models"
+        autocomplete="off"
+      />
+    </details>
+
+    <div class="writer-actions">
+      <button type="button" class="btn-primary px-5 py-2 text-xs" data-writer-save>
+        Save draft
+      </button>
+      <a class="writer-link" data-writer-preview target="_blank" rel="noopener" hidden>
+        Read it as a page ↗
+      </a>
+      <button type="button" class="writer-ghost" data-writer-publish hidden>Publish</button>
+      <button type="button" class="writer-ghost" data-writer-unpublish hidden>Unpublish</button>
+      <p class="writer-status" role="status" aria-live="polite" data-writer-status></p>
+    </div>
+  </form>
+</section>
+
+<script is:inline define:vars={{ posts: [...drafts, ...published] }}>
+  (function () {
+    const root = document.querySelector('[data-writer]');
+    if (!root || root.dataset.bound === 'true') return;
+    root.dataset.bound = 'true';
+
+    const byId = (id) => document.getElementById(id);
+    const el = {
+      slug: root.querySelector('[data-writer-slug]'),
+      title: byId('writer-title'),
+      body: byId('writer-body'),
+      description: byId('writer-description'),
+      tags: byId('writer-tags'),
+      save: root.querySelector('[data-writer-save]'),
+      publish: root.querySelector('[data-writer-publish]'),
+      unpublish: root.querySelector('[data-writer-unpublish]'),
+      preview: root.querySelector('[data-writer-preview]'),
+      status: root.querySelector('[data-writer-status]'),
+      open: root.querySelector('[data-writer-open]'),
+    };
+
+    const say = (message) => {
+      if (el.status) el.status.textContent = message;
+    };
+
+    function load(slug) {
+      const post = posts.find((p) => p.slug === slug);
+      el.slug.value = post ? post.slug : '';
+      el.title.value = post ? post.title : '';
+      el.body.value = post ? post.body : '';
+      el.description.value = post ? post.description : '';
+      el.tags.value = post ? (post.tags || []).join(', ') : '';
+
+      const isSaved = Boolean(post);
+      const isPublished = post && post.status === 'published';
+      el.preview.hidden = !isSaved;
+      if (isSaved) el.preview.href = `/writing/${post.slug}`;
+      el.publish.hidden = !isSaved || isPublished;
+      el.unpublish.hidden = !isPublished;
+      say(isPublished ? 'Published — live on the site.' : isSaved ? 'Draft.' : '');
+    }
+
+    el.open?.addEventListener('change', () => load(el.open.value));
+
+    async function call(payload, working, done) {
+      say(working);
+      try {
+        const response = await fetch('/api/admin/posts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.ok) {
+          say(data.error || 'Something went wrong.');
+          return null;
+        }
+        say(done);
+        return data;
+      } catch {
+        say('Could not reach the server.');
+        return null;
+      }
+    }
+
+    el.save?.addEventListener('click', async () => {
+      if (el.title.value.trim().length < 3) {
+        say('Give it a title first.');
+        el.title.focus();
+        return;
+      }
+      const data = await call(
+        {
+          action: 'save',
+          slug: el.slug.value || undefined,
+          title: el.title.value,
+          body: el.body.value,
+          description: el.description.value,
+          tags: el.tags.value,
+        },
+        'Saving…',
+        'Saved.',
+      );
+      if (data) window.setTimeout(() => window.location.reload(), 700);
+    });
+
+    el.publish?.addEventListener('click', async () => {
+      if (!window.confirm('Publish this to the live site?')) return;
+      const data = await call(
+        { action: 'publish', slug: el.slug.value },
+        'Publishing…',
+        'Live.',
+      );
+      if (data) window.setTimeout(() => window.location.reload(), 700);
+    });
+
+    el.unpublish?.addEventListener('click', async () => {
+      const data = await call(
+        { action: 'unpublish', slug: el.slug.value },
+        'Unpublishing…',
+        'Back to draft.',
+      );
+      if (data) window.setTimeout(() => window.location.reload(), 700);
+    });
+  })();
+</script>
+
+<style>
+  .writer-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .writer-select,
+  .writer-input {
+    border: 1px solid var(--c-border);
+    border-radius: 12px;
+    background-color: var(--c-bg);
+    padding: 0.65rem 0.9rem;
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    color: var(--c-text);
+  }
+
+  .writer-select {
+    padding-block: 0.45rem;
+    font-size: 0.8rem;
+  }
+
+  .writer-input:focus,
+  .writer-select:focus {
+    border-color: var(--c-accent);
+    outline: none;
+  }
+
+  .writer-form {
+    margin-top: 1.5rem;
+  }
+
+  .writer-label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--c-text);
+  }
+
+  .writer-input {
+    width: 100%;
+    margin-bottom: 1.25rem;
+  }
+
+  .writer-title {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 600;
+  }
+
+  /* A serif, comfortably sized, generously spaced — writing in it should feel
+     like writing, not like filling in a form. */
+  .writer-body {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    line-height: 1.75;
+    resize: vertical;
+  }
+
+  .writer-more {
+    margin-bottom: 1.25rem;
+  }
+
+  .writer-more summary {
+    cursor: pointer;
+    font-size: 0.82rem;
+    color: var(--c-text-muted);
+    margin-bottom: 0.9rem;
+  }
+
+  .writer-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .writer-ghost {
+    border: 1px solid var(--c-border);
+    border-radius: 999px;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--c-text-muted);
+    cursor: pointer;
+  }
+
+  .writer-ghost:hover {
+    border-color: var(--c-border-strong);
+    color: var(--c-text);
+  }
+
+  .writer-link {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--c-accent);
+  }
+
+  .writer-status {
+    font-size: 0.78rem;
+    color: var(--c-text-subtle);
+  }
+</style>

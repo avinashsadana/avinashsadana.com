@@ -28,33 +28,7 @@ export const getTimeline = async () => (await getCollection('timeline')).sort(by
 
 export const getBooks = async () => (await getCollection('books')).sort(byOrder);
 
-/**
- * Drafts are readable everywhere except the live site.
- *
- * `astro dev` and Vercel *preview* deployments show them, so a piece can be
- * read exactly as it will look before anyone decides to publish it. The
- * production build never includes them — that is asserted by a test and by
- * `npm run verify:build`, because "draft" has to mean something.
- */
-export const showDrafts = (): boolean =>
-  import.meta.env.DEV || process.env.VERCEL_ENV === 'preview';
 
-const newestFirst = <T extends { data: { pubDate: Date } }>(a: T, b: T) =>
-  b.data.pubDate.getTime() - a.data.pubDate.getTime();
-
-/** Posts visible in the current environment. */
-export const getPosts = async () =>
-  (await getCollection('writing', ({ data }) => !data.draft || showDrafts())).sort(newestFirst);
-
-/** Posts that are live for the public, whatever the environment. */
-export const getPublishedPosts = async () =>
-  (await getCollection('writing', ({ data }) => !data.draft)).sort(newestFirst);
-
-/** Everything still marked draft — the review queue. */
-export const getDraftPosts = async () =>
-  (await getCollection('writing', ({ data }) => data.draft)).sort(newestFirst);
-
-export type Post = CollectionEntry<'writing'>;
 export type Venture = CollectionEntry<'ventures'>;
 
 /** "Jun 2025 — Aug 2025" / "May 2018 — Present" */
@@ -76,8 +50,3 @@ export function isoDate(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
-/** Rough read time, used as a courtesy label on posts. */
-export function readingTime(body: string | undefined): string {
-  const words = (body ?? '').trim().split(/\s+/).filter(Boolean).length;
-  return `${Math.max(1, Math.round(words / 200))} min read`;
-}

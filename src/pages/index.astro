@@ -5,11 +5,12 @@ import Portrait from '../components/Portrait.astro';
 import Section from '../components/Section.astro';
 import Timeline from '../components/Timeline.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { dateRange, getPosts, getVentures } from '../lib/content';
+import { dateRange, getVentures } from '../lib/content';
+import { getPublishedPosts } from '../lib/posts';
 import { site } from '../site.config';
 
 const ventures = await getVentures();
-const posts = (await getPosts()).slice(0, 3);
+const posts = (await getPublishedPosts()).slice(0, 3);
 ---
 
 <BaseLayout title={site.name} description={site.description}>
@@ -118,12 +119,12 @@ const posts = (await getPosts()).slice(0, 3);
         <ul class="divide-y divide-line border-y border-line">
           {posts.map((post, index) => (
             <li class="reveal" style={`--reveal-delay: ${index * 70}ms`}>
-              <a href={`/writing/${post.id}`} class="group flex flex-wrap items-baseline gap-x-6 gap-y-1 py-6">
+              <a href={`/writing/${post.slug}`} class="group flex flex-wrap items-baseline gap-x-6 gap-y-1 py-6">
                 <span class="font-mono text-xs text-subtle">
-                  {post.data.tags[0] ?? 'Essay'}
+                  {post.tags[0] ?? 'Essay'}
                 </span>
                 <h3 class="flex-1 font-display text-xl font-bold tracking-tight text-ink lg:text-2xl">
-                  <span class="link-underline">{post.data.title}</span>
+                  <span class="link-underline">{post.title}</span>
                 </h3>
               </a>
             </li>

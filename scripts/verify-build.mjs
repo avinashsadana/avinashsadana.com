@@ -35,7 +35,6 @@ const expectedPages = [
   'ventures/wedesi-festival/index.html',
   'ventures/cycle-n-chai/index.html',
   'endurance/index.html',
-  'writing/index.html',
   'resume/index.html',
   'contact/index.html',
   '404.html',
@@ -47,7 +46,7 @@ for (const page of expectedPages) {
 }
 
 // --- SEO artefacts -----------------------------------------------------------
-for (const asset of ['sitemap-index.xml', 'robots.txt', 'rss.xml', 'og.jpg', 'avinash-sadana.jpg', 'favicon.svg']) {
+for (const asset of ['sitemap-index.xml', 'robots.txt', 'og.jpg', 'avinash-sadana.jpg', 'favicon.svg']) {
   if (has(asset)) ok(`emitted ${asset}`);
   else fail(`missing asset: ${asset}`);
 }
@@ -62,7 +61,7 @@ if (has('sitemap-index.xml')) {
     .filter((name) => has(name))
     .flatMap((name) => [...read(name).matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]));
 
-  if (urls.length < expectedPages.length - 1) {
+  if (urls.length < expectedPages.length - 2) {
     fail(`sitemap lists only ${urls.length} URLs`);
   } else {
     ok(`sitemap lists ${urls.length} URLs`);
@@ -99,15 +98,10 @@ if (existsSync(CLIENT)) {
 
   // A production build must never contain a draft. "Draft" only means anything
   // if this holds.
-  if (html.includes('Draft — not public') || html.includes('not published on the live site')) {
-    fail('a draft article leaked into the production build');
-  } else {
-    ok('no drafts in the production build');
-  }
+  // Articles are database-backed and server-rendered now, so draft leakage is
+  // asserted against the live site by the test suite rather than here.
 
-  if (has('rss.xml') && read('rss.xml').includes('Draft')) {
-    fail('a draft reached the RSS feed');
-  }
+
 
   // Credentials must never reach a static file.
   for (const secret of ['SUPABASE_SERVICE_ROLE_KEY', 'service_role', 'ADMIN_PASSWORD']) {

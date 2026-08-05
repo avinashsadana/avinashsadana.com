@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 import { env } from './env';
-import { getPublishedPosts, type Post } from './content';
+import { getPublishedPosts, type Post } from './posts';
 import { site } from '../site.config';
 
 /**
@@ -62,7 +62,7 @@ export function excerpt(post: Post, paragraphs = 2): string {
 }
 
 export function subjectFor(post: Post): string {
-  return post.data.title;
+  return post.title;
 }
 
 interface BuiltEmail {
@@ -72,14 +72,14 @@ interface BuiltEmail {
 }
 
 export function buildEmail(post: Post, unsubscribeToken: string): BuiltEmail {
-  const url = `${site.url}/writing/${post.id}`;
+  const url = `${site.url}/writing/${post.slug}`;
   const unsubscribeUrl = `${site.url}/api/unsubscribe?token=${encodeURIComponent(unsubscribeToken)}`;
   const body = excerpt(post);
 
   const text = [
-    post.data.title,
+    post.title,
     '',
-    post.data.description,
+    post.description,
     '',
     body,
     '',
@@ -102,9 +102,9 @@ export function buildEmail(post: Post, unsubscribeToken: string): BuiltEmail {
       </p>
 
       <h1 style="margin:0 0 12px;font-size:26px;line-height:1.25;font-weight:700;color:#22252a">
-        ${escapeHtml(post.data.title)}
+        ${escapeHtml(post.title)}
       </h1>
-      <p style="margin:0 0 24px;font-size:16px;color:#5f636a">${escapeHtml(post.data.description)}</p>
+      <p style="margin:0 0 24px;font-size:16px;color:#5f636a">${escapeHtml(post.description)}</p>
 
       <div style="font-size:15px;color:#22252a">${paragraphs}</div>
 
@@ -193,5 +193,5 @@ export async function sendNewsletter(
 /** Published posts that have never been mailed, newest first. */
 export async function unsentPosts(sentSlugs: string[]): Promise<Post[]> {
   const posts = await getPublishedPosts();
-  return posts.filter((post) => !sentSlugs.includes(post.id));
+  return posts.filter((post) => !sentSlugs.includes(post.slug));
 }

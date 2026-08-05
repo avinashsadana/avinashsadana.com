@@ -1,46 +1,46 @@
 ---
-import type { GetStaticPaths } from 'astro';
-import { render } from 'astro:content';
 import ShareButtons from '../../components/ShareButtons.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { formatDate, getPosts, isoDate, readingTime } from '../../lib/content';
+import { formatDate, isoDate } from '../../lib/content';
+import { getPost, readingTime, renderMarkdown } from '../../lib/posts';
 import { site } from '../../site.config';
 
-export const getStaticPaths = (async () => {
-  const posts = await getPosts();
-  return posts.map((post) => ({
-    params: { id: post.id },
-    props: { post },
-  }));
-}) satisfies GetStaticPaths;
+// On demand, so publishing from /admin takes effect at once. Drafts are
+// reachable by direct link for review but are noindex and clearly marked.
+export const prerender = false;
 
-const { post } = Astro.props;
-const { Content } = await render(post);
-const { data } = post;
+const { slug } = Astro.params;
+const post = slug ? await getPost(slug) : null;
+
+if (!post) return Astro.rewrite('/404');
+
+const html = renderMarkdown(post.body);
 
 const schema = {
   '@context': 'https://schema.org',
   '@type': 'BlogPosting',
-  headline: data.title,
-  description: data.description,
-  datePublished: data.pubDate.toISOString(),
-  ...(data.updatedDate ? { dateModified: data.updatedDate.toISOString() } : {}),
+  headline: post.title,
+  description: post.description,
+  datePublished: post.pubDate.toISOString(),
+  dateModified: post.updatedAt.toISOString(),
   author: { '@id': `${site.url}/#person` },
   publisher: { '@id': `${site.url}/#person` },
-  keywords: data.tags.join(', '),
+  keywords: post.tags.join(', '),
   mainEntityOfPage: new URL(Astro.url.pathname, Astro.site).href,
 };
+
+const isDraft = post.status === 'draft';
 ---
 
 <BaseLayout
-  title={data.title}
-  description={data.description}
+  title={post.title}
+  description={post.description}
   type="article"
-  publishedTime={data.pubDate}
-  modifiedTime={data.updatedDate}
-  tags={data.tags}
+  publishedTime={post.pubDate}
+  modifiedTime={post.updatedAt}
+  tags={post.tags}
   schema={schema}
-  noindex={data.draft}
+  noindex={isDraft}
 >
   <article class="shell py-14 lg:py-20">
     <a href="/writing" class="link-underline text-sm font-medium text-muted hover:text-ink">
@@ -49,26 +49,26 @@ const schema = {
 
     <header class="mt-8 max-w-3xl">
       {
-        data.draft && (
+        isDraft && (
           <p class="mb-5 rounded-xl border border-accent/40 bg-accent-soft px-4 py-3 text-sm font-medium text-accent">
-            Draft — visible here for review, not published on the live site.
+            Draft — visible by link for review, not published and not indexed.
           </p>
         )
       }
 
       <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-medium text-subtle">
-        <time datetime={isoDate(data.pubDate)}>{formatDate(data.pubDate)}</time>
+        <time datetime={isoDate(post.pubDate)}>{formatDate(post.pubDate)}</time>
         <span aria-hidden="true">·</span>
         <span>{readingTime(post.body)}</span>
       </div>
 
-      <h1 class="mt-5 font-display text-hero font-bold text-ink">{data.title}</h1>
-      <p class="prose-body mt-6 text-lg">{data.description}</p>
+      <h1 class="mt-5 font-display text-hero font-bold text-ink">{post.title}</h1>
+      {post.description && <p class="prose-body mt-6 text-lg">{post.description}</p>}
 
       {
-        data.tags.length > 0 && (
+        post.tags.length > 0 && (
           <ul class="mt-7 flex flex-wrap gap-2">
-            {data.tags.map((tag) => (
+            {post.tags.map((tag) => (
               <li class="rounded-full border border-line px-3 py-1 text-xs font-medium text-muted">
                 {tag}
               </li>
@@ -78,12 +78,11 @@ const schema = {
       }
     </header>
 
-    <div class="post-body mt-12 max-w-2xl">
-      <Content />
-    </div>
+    {/* Rendered from markdown the admin wrote; raw HTML in the source is escaped. */}
+    <div class="post-body mt-12 max-w-2xl" set:html={html} />
 
     <div class="mt-14 max-w-2xl border-t border-line pt-8">
-      <ShareButtons title={data.title} />
+      <ShareButtons title={post.title} />
     </div>
   </article>
 </BaseLayout>
