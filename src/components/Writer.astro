@@ -56,6 +56,21 @@ const all = [...drafts, ...published];
       rows="18"
       placeholder="Just type. Leave a blank line between paragraphs.&#10;&#10;Start a line with ## to make a heading.&#10;Start a line with - to make a bullet."></textarea>
 
+    <div class="writer-photos">
+      <button type="button" class="writer-ghost" data-writer-add-photo>Add a photo</button>
+      <span class="writer-count" data-writer-photo-count>0 of 5</span>
+      <input
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        multiple
+        hidden
+        data-writer-file
+      />
+      <p class="writer-hint">
+        Dropped in wherever your cursor is. Up to five per article.
+      </p>
+    </div>
+
     <details class="writer-more">
       <summary>Summary and tags (optional)</summary>
       <label class="writer-label" for="writer-description">
@@ -132,9 +147,110 @@ const all = [...drafts, ...published];
       el.publish.hidden = !isSaved || isPublished;
       el.unpublish.hidden = !isPublished;
       say(isPublished ? 'Published — live on the site.' : isSaved ? 'Draft.' : '');
+      refreshCount();
     }
 
     el.open?.addEventListener('change', () => load(el.open.value));
+
+    const MAX_PHOTOS = 5;
+    const photo = {
+      input: root.querySelector('[data-writer-file]'),
+      button: root.querySelector('[data-writer-add-photo]'),
+      count: root.querySelector('[data-writer-photo-count]'),
+    };
+
+    const countPhotos = () => (el.body.value.match(/!\[[^\]]*\]\([^)]+\)/g) || []).length;
+
+    function refreshCount() {
+      const used = countPhotos();
+      if (photo.count) photo.count.textContent = used + ' of ' + MAX_PHOTOS;
+      if (photo.button) photo.button.disabled = used >= MAX_PHOTOS;
+    }
+
+    /**
+     * Resize and re-encode in the browser before uploading. A phone photo is
+     * often 4-8 MB; at 1600px WebP it is usually under 200 KB, which keeps both
+     * the upload and the reader's page fast. Doing it here also avoids running
+     * an image library inside a serverless function.
+     */
+    function shrink(file) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        const url = URL.createObjectURL(file);
+        image.onload = () => {
+          URL.revokeObjectURL(url);
+          const maxWidth = 1600;
+          const scale = Math.min(1, maxWidth / image.width);
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.round(image.width * scale);
+          canvas.height = Math.round(image.height * scale);
+          canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+          canvas.toBlob(
+            (blob) => (blob ? resolve(blob) : reject(new Error('Could not process that image'))),
+            'image/webp',
+            0.82,
+          );
+        };
+        image.onerror = () => {
+          URL.revokeObjectURL(url);
+          reject(new Error('Could not read that image'));
+        };
+        image.src = url;
+      });
+    }
+
+    function insertAtCursor(text) {
+      const start = el.body.selectionStart ?? el.body.value.length;
+      const end = el.body.selectionEnd ?? start;
+      const before = el.body.value.slice(0, start).replace(/\s+$/, '');
+      const after = el.body.value.slice(end).replace(/^\s+/, '');
+      el.body.value = (before ? before + '\n\n' : '') + text + (after ? '\n\n' + after : '\n');
+      const caret = (before ? before.length + 2 : 0) + text.length;
+      el.body.setSelectionRange(caret, caret);
+      el.body.focus();
+      refreshCount();
+    }
+
+    photo.button?.addEventListener('click', () => photo.input.click());
+
+    photo.input?.addEventListener('change', async () => {
+      const files = Array.from(photo.input.files || []);
+      photo.input.value = '';
+      if (files.length === 0) return;
+
+      const room = MAX_PHOTOS - countPhotos();
+      if (room <= 0) {
+        say('Five photos is the limit for one article.');
+        return;
+      }
+      const chosen = files.slice(0, room);
+      if (files.length > room) say('Only room for ' + room + ' more — using the first ' + room + '.');
+
+      for (const [index, file] of chosen.entries()) {
+        say('Adding photo ' + (index + 1) + ' of ' + chosen.length + '…');
+        try {
+          const blob = await shrink(file);
+          const form = new FormData();
+          form.append('file', new File([blob], 'photo.webp', { type: 'image/webp' }));
+
+          const response = await fetch('/api/admin/upload', { method: 'POST', body: form });
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok || !data.ok) {
+            say(data.error || 'That photo would not upload.');
+            return;
+          }
+          const alt = file.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').slice(0, 80);
+          insertAtCursor('![' + alt + '](' + data.url + ')');
+        } catch (error) {
+          say(String(error.message || error));
+          return;
+        }
+      }
+      say('Photo added. Save the draft to keep it.');
+    });
+
+    el.body?.addEventListener('input', refreshCount);
+    refreshCount();
 
     async function call(payload, working, done) {
       say(working);
@@ -299,6 +415,31 @@ const all = [...drafts, ...published];
     font-size: 0.75rem;
     font-weight: 600;
     color: var(--c-accent);
+  }
+
+  .writer-photos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .writer-count {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--c-text-subtle);
+  }
+
+  .writer-hint {
+    flex-basis: 100%;
+    font-size: 0.78rem;
+    color: var(--c-text-subtle);
+  }
+
+  .writer-ghost:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
   }
 
   .writer-status {
