@@ -8,6 +8,9 @@ interface Props {
 
 const { drafts, published } = Astro.props;
 const all = [...drafts, ...published];
+
+/** The only place the photo limit is written down. */
+const MAX_PHOTOS = 10;
 ---
 
 <section class="writer" data-writer>
@@ -58,7 +61,7 @@ const all = [...drafts, ...published];
 
     <div class="writer-photos">
       <button type="button" class="writer-ghost" data-writer-add-photo>Add a photo</button>
-      <span class="writer-count" data-writer-photo-count>0 of 5</span>
+      <span class="writer-count" data-writer-photo-count>0 of {MAX_PHOTOS}</span>
       <input
         type="file"
         accept="image/jpeg,image/png,image/webp"
@@ -67,7 +70,7 @@ const all = [...drafts, ...published];
         data-writer-file
       />
       <p class="writer-hint">
-        Dropped in wherever your cursor is. Up to five per article.
+        Dropped in wherever your cursor is. Up to {MAX_PHOTOS} per article.
       </p>
     </div>
 
@@ -107,7 +110,7 @@ const all = [...drafts, ...published];
   </form>
 </section>
 
-<script is:inline define:vars={{ posts: [...drafts, ...published] }}>
+<script is:inline define:vars={{ posts: [...drafts, ...published], MAX_PHOTOS }}>
   (function () {
     const root = document.querySelector('[data-writer]');
     if (!root || root.dataset.bound === 'true') return;
@@ -152,7 +155,6 @@ const all = [...drafts, ...published];
 
     el.open?.addEventListener('change', () => load(el.open.value));
 
-    const MAX_PHOTOS = 5;
     const photo = {
       input: root.querySelector('[data-writer-file]'),
       button: root.querySelector('[data-writer-add-photo]'),
@@ -220,7 +222,7 @@ const all = [...drafts, ...published];
 
       const room = MAX_PHOTOS - countPhotos();
       if (room <= 0) {
-        say('Five photos is the limit for one article.');
+        say(MAX_PHOTOS + ' photos is the limit for one article.');
         return;
       }
       const chosen = files.slice(0, room);
