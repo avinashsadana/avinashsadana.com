@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { isAdminConfigured, isSignedIn } from '../lib/admin';
 import { getSupabase, isSupabaseConfigured } from '../lib/supabase';
+import { getPosts } from '../lib/content';
 
 export const prerender = false;
 
@@ -34,13 +35,21 @@ interface Subscriber {
   created_at: string;
 }
 
+interface SendRecord {
+  post_slug: string;
+  status: string;
+  sent_count: number;
+  sent_at: string | null;
+}
+
 let messages: Message[] = [];
 let entries: Entry[] = [];
 let subscribers: Subscriber[] = [];
+let sends: SendRecord[] = [];
 
 if (signedIn) {
   const supabase = getSupabase();
-  const [messageResult, entryResult, subscriberResult] = await Promise.all([
+  const [messageResult, entryResult, subscriberResult, sendResult] = await Promise.all([
     supabase
       .from('contact_messages')
       .select('id, name, email, subject, message, status, created_at')
@@ -57,12 +66,20 @@ if (signedIn) {
       .select('id, email, status, created_at')
       .order('created_at', { ascending: false })
       .limit(1000),
+    supabase
+      .from('newsletter_sends')
+      .select('post_slug, status, sent_count, sent_at')
+      .limit(200),
   ]);
 
   messages = (messageResult.data ?? []) as Message[];
   entries = (entryResult.data ?? []) as Entry[];
   subscribers = (subscriberResult.data ?? []) as Subscriber[];
+  sends = (sendResult.data ?? []) as SendRecord[];
 }
+
+const posts = signedIn ? await getPosts() : [];
+const sendBySlug = new Map(sends.map((s) => [s.post_slug, s]));
 
 const confirmed = subscribers.filter((s) => s.status === 'confirmed');
 const pendingSubs = subscribers.filter((s) => s.status === 'pending');
@@ -216,8 +233,73 @@ const when = (value: string) =>
           </section>
 
           <section class="mt-16">
+            <h2 class="eyebrow">Send a newsletter</h2>
+
+            {confirmed.length === 0 ? (
+              <p class="prose-body mt-5 text-[0.95rem]">
+                No confirmed subscribers yet, so there is nobody to send to.
+              </p>
+            ) : (
+              <ul class="mt-6 space-y-3">
+                {posts.map((post) => {
+                  const record = sendBySlug.get(post.id);
+                  const done = record?.status === 'sent';
+                  return (
+                    <li class="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-line bg-bg-raised px-5 py-4">
+                      <div class="min-w-0">
+                        <p class="text-sm font-semibold text-ink">{post.data.title}</p>
+                        <p class="mt-0.5 text-xs text-subtle">
+                          {done
+                            ? `Sent to ${record?.sent_count ?? 0} on ${new Date(record!.sent_at!).toLocaleDateString('en-GB')}`
+                            : record
+                              ? 'Prepared — not sent yet'
+                              : 'Never sent'}
+                        </p>
+                      </div>
+                      {done ? (
+                        <span class="shrink-0 rounded-full border border-line px-4 py-1.5 text-xs font-semibold text-subtle">
+                          Sent
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          class="btn-primary shrink-0 px-5 py-2 text-xs"
+                          data-newsletter-preview={post.id}
+                        >
+                          Preview & send
+                        </button>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+
+            <div class="mt-5 hidden rounded-2xl border border-line bg-bg-raised p-6" data-newsletter-panel>
+              <p class="text-sm font-semibold text-ink" data-newsletter-summary />
+              <div
+                class="mt-4 max-h-80 overflow-y-auto rounded-xl border border-line bg-white p-4"
+                data-newsletter-html
+              />
+              <div class="mt-5 flex flex-wrap items-center gap-3">
+                <button type="button" class="btn-primary px-5 py-2 text-xs" data-newsletter-send>
+                  Send it
+                </button>
+                <button
+                  type="button"
+                  class="rounded-full border border-line px-5 py-2 text-xs font-semibold text-muted transition-colors hover:border-line-strong hover:text-ink"
+                  data-newsletter-cancel
+                >
+                  Cancel
+                </button>
+                <p class="text-xs text-subtle" data-newsletter-status />
+              </div>
+            </div>
+          </section>
+
+          <section class="mt-16">
             <h2 class="eyebrow">
-              Newsletter · {confirmed.length} confirmed, {pendingSubs.length} pending
+              Subscribers · {confirmed.length} confirmed, {pendingSubs.length} pending
             </h2>
 
             {subscribers.length === 0 ? (
@@ -410,6 +492,79 @@ const when = (value: string) =>
       signOut.addEventListener('click', async () => {
         await fetch('/api/admin/login', { method: 'DELETE' });
         window.location.reload();
+      });
+    }
+
+    const panel = document.querySelector<HTMLElement>('[data-newsletter-panel]');
+    if (panel && panel.dataset.bound !== 'true') {
+      panel.dataset.bound = 'true';
+      const summary = panel.querySelector<HTMLElement>('[data-newsletter-summary]');
+      const preview = panel.querySelector<HTMLElement>('[data-newsletter-html]');
+      const sendButton = panel.querySelector<HTMLButtonElement>('[data-newsletter-send]');
+      const cancel = panel.querySelector<HTMLButtonElement>('[data-newsletter-cancel]');
+      const status = panel.querySelector<HTMLElement>('[data-newsletter-status]');
+      let slug: string | null = null;
+
+      const post = (action: string) =>
+        fetch('/api/admin/newsletter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action, slug }),
+        });
+
+      for (const button of document.querySelectorAll<HTMLButtonElement>(
+        '[data-newsletter-preview]',
+      )) {
+        button.addEventListener('click', async () => {
+          slug = button.dataset.newsletterPreview ?? null;
+          if (!slug) return;
+          button.disabled = true;
+          button.textContent = 'Loading…';
+          try {
+            const response = await post('preview');
+            const data = await response.json();
+            if (!response.ok || !data.ok) throw new Error(data.error ?? 'Preview failed');
+            if (summary) {
+              summary.textContent = `"${data.subject}" — will be sent to ${data.recipients} subscriber${data.recipients === 1 ? '' : 's'}.`;
+            }
+            // The preview is our own template, built server-side from the
+            // article; it is not user input.
+            if (preview) preview.innerHTML = data.html;
+            if (status) status.textContent = '';
+            panel.classList.remove('hidden');
+            panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          } catch (error) {
+            if (status) status.textContent = String(error);
+          } finally {
+            button.disabled = false;
+            button.textContent = 'Preview & send';
+          }
+        });
+      }
+
+      cancel?.addEventListener('click', () => {
+        panel.classList.add('hidden');
+        slug = null;
+      });
+
+      sendButton?.addEventListener('click', async () => {
+        if (!slug) return;
+        if (!window.confirm('Send this to every confirmed subscriber? This cannot be undone.')) return;
+        sendButton.disabled = true;
+        sendButton.textContent = 'Sending…';
+        try {
+          const response = await post('send');
+          const data = await response.json();
+          if (status) status.textContent = data.message ?? data.error ?? 'Done.';
+          if (response.ok && data.ok) {
+            window.setTimeout(() => window.location.reload(), 1800);
+          }
+        } catch {
+          if (status) status.textContent = 'Could not reach the server.';
+        } finally {
+          sendButton.disabled = false;
+          sendButton.textContent = 'Send it';
+        }
       });
     }
 

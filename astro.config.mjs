@@ -22,6 +22,11 @@ export default defineConfig({
       filter: (page) => !page.includes('/api/') && !page.includes('/admin'),
     }),
   ],
+  // Astro's built-in cross-origin check is all-or-nothing, and it 403s the
+  // one-click unsubscribe POST that Gmail and Outlook send. src/middleware.ts
+  // reimplements the same rule with a single exception for that endpoint.
+  security: { checkOrigin: false },
+
   // The dev toolbar injects its own headings and landmarks into the page, which
   // makes accessibility assertions ambiguous. It stays on for normal `astro dev`
   // and is switched off for the Playwright run.

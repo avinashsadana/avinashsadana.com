@@ -1,0 +1,37 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+export const prerender = false;
+
+const status = Astro.url.searchParams.get('status');
+
+const states = {
+  ok: {
+    title: 'You’re unsubscribed.',
+    body: 'No more emails. The writing stays at avinashsadana.com/writing if you ever want to read it there, and the RSS feed is always open.',
+  },
+  invalid: {
+    title: 'That link didn’t work.',
+    body: 'It may already have been used. If you’re still receiving emails, reply to any of them and I’ll remove you myself.',
+  },
+  error: {
+    title: 'Something went wrong.',
+    body: 'That’s on my end. Try the link again in a few minutes, or reply to any email and I’ll take you off the list manually.',
+  },
+} as const;
+
+const state = states[(status as keyof typeof states) ?? 'invalid'] ?? states.invalid;
+---
+
+<BaseLayout title="Unsubscribed" description="Newsletter unsubscribe." noindex>
+  <div class="shell flex min-h-[55vh] flex-col justify-center py-20">
+    <p class="eyebrow">Newsletter</p>
+    <h1 class="mt-5 font-display text-hero font-bold text-ink">{state.title}</h1>
+    <p class="prose-body mt-5 text-lg">{state.body}</p>
+
+    <div class="mt-10 flex flex-wrap gap-3">
+      <a href="/writing" class="btn-primary">Read the writing</a>
+      <a href="/" class="btn-secondary">Home</a>
+    </div>
+  </div>
+</BaseLayout>
