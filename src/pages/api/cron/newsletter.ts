@@ -45,10 +45,24 @@ export const GET: APIRoute = async ({ request }) => {
   }
 
   const already = new Set((sends ?? []).map((s) => s.post_slug as string));
-  const pending = posts.filter((post) => !already.has(post.id));
+
+  // Only recently published writing. Without this, five articles published on
+  // the same day would produce a "ready to send" email once a day for five
+  // days, working through a backlog nobody asked to be reminded about. Older
+  // pieces can still be sent by hand from /admin whenever they are wanted.
+  const RECENT_DAYS = 14;
+  const cutoff = Date.now() - RECENT_DAYS * 24 * 60 * 60 * 1000;
+
+  const pending = posts.filter(
+    (post) => !already.has(post.id) && post.data.pubDate.getTime() >= cutoff,
+  );
 
   if (pending.length === 0) {
-    return json({ ok: true, prepared: 0, reason: 'every published article has been handled' });
+    return json({
+      ok: true,
+      prepared: 0,
+      reason: 'nothing published in the last 14 days that has not been handled',
+    });
   }
 
   // Only the newest, so a first run after adding several articles does not
