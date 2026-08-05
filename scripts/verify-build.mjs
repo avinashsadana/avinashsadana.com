@@ -97,6 +97,18 @@ if (existsSync(CLIENT)) {
 
   if (html.includes('TODO(avinash)')) fail('a TODO marker leaked into rendered output');
 
+  // A production build must never contain a draft. "Draft" only means anything
+  // if this holds.
+  if (html.includes('Draft — not public') || html.includes('not published on the live site')) {
+    fail('a draft article leaked into the production build');
+  } else {
+    ok('no drafts in the production build');
+  }
+
+  if (has('rss.xml') && read('rss.xml').includes('Draft')) {
+    fail('a draft reached the RSS feed');
+  }
+
   // Credentials must never reach a static file.
   for (const secret of ['SUPABASE_SERVICE_ROLE_KEY', 'service_role', 'ADMIN_PASSWORD']) {
     if (html.includes(secret)) fail(`"${secret}" appears in built HTML`);

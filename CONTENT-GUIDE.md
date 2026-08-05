@@ -79,11 +79,53 @@ Only four things need your attention:
 | `pubDate` | Today's date as `YYYY-MM-DD` |
 | `tags` | One to three. Reuse existing ones where you can: Operations, Business Models, Endurance, Ventures, Supply Chain, Bikepacking |
 
-`draft: false` publishes it. Set `draft: true` to keep working on it privately.
+**Write `draft: true`** if you want me to review it first — see below. Use
+`draft: false` only when you want it live immediately.
 
 ### 5. Scroll down, click **Commit changes**
 
-Done. Live in about a minute at `avinashsadana.com/writing`.
+---
+
+## Having it reviewed before it goes live
+
+This is the normal way to publish. Nothing reaches the site until you say so.
+
+**1. You write it with `draft: true`**
+
+Commit it as above. It is saved and version-controlled, but it does **not**
+appear on avinashsadana.com, it is **not** in the RSS feed, and it **cannot** be
+emailed to subscribers. All three are enforced by the code, not by memory.
+
+**2. Tell me the filename**
+
+Say something like *"review what-procurement-taught-me"*. I read it and go
+through:
+
+- spelling, grammar and punctuation
+- tightening — cutting the words that are not working
+- structure — whether the argument lands in the right order
+- headings, so it is skimmable
+- the `description`, which is what people see when the link is shared
+- factual consistency with the rest of the site
+
+**3. I show you what I changed and why**
+
+You get the edits before anything is published. Disagree with any of them and
+they go back.
+
+**4. You say publish**
+
+I flip `draft: true` to `draft: false`. It goes live in about a minute, and the
+newsletter becomes sendable from `/admin`.
+
+### Seeing a draft as a real page
+
+Drafts render on `astro dev` and on Vercel preview deployments, with a "Draft —
+not public" banner, so you can read it laid out properly before deciding. They
+are also marked `noindex`, so search engines ignore them even there.
+
+Every draft waiting on review is listed under **In review** at
+`avinashsadana.com/admin`.
 
 ---
 

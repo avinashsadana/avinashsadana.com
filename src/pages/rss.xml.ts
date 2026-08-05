@@ -1,10 +1,10 @@
 import rss from '@astrojs/rss';
 import type { APIRoute } from 'astro';
-import { getPosts } from '../lib/content';
+import { getPublishedPosts } from '../lib/content';
 import { site } from '../site.config';
 
 export const GET: APIRoute = async (context) => {
-  const posts = await getPosts();
+  const posts = await getPublishedPosts();
 
   return rss({
     title: `${site.name} — Writing`,

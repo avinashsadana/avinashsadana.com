@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { fail, json, readJson } from '../../../lib/api';
 import { isSignedIn } from '../../../lib/admin';
 import { getSupabase, isSupabaseConfigured } from '../../../lib/supabase';
-import { getPosts } from '../../../lib/content';
+import { getPublishedPosts } from '../../../lib/content';
 import { buildEmail, sendNewsletter, subjectFor, type Subscriber } from '../../../lib/newsletter';
 
 export const prerender = false;
@@ -22,7 +22,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   const action = typeof body.action === 'string' ? body.action : '';
   const slug = typeof body.slug === 'string' ? body.slug : '';
 
-  const posts = await getPosts();
+  const posts = await getPublishedPosts();
   const post = posts.find((p) => p.id === slug);
   if (!post) return fail('No published article with that name.', 404);
 

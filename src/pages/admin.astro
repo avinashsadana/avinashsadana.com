@@ -2,7 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { isAdminConfigured, isSignedIn } from '../lib/admin';
 import { getSupabase, isSupabaseConfigured } from '../lib/supabase';
-import { getPosts } from '../lib/content';
+import { getDraftPosts, getPublishedPosts } from '../lib/content';
 
 export const prerender = false;
 
@@ -78,7 +78,8 @@ if (signedIn) {
   sends = (sendResult.data ?? []) as SendRecord[];
 }
 
-const posts = signedIn ? await getPosts() : [];
+const posts = signedIn ? await getPublishedPosts() : [];
+const drafts = signedIn ? await getDraftPosts() : [];
 const sendBySlug = new Map(sends.map((s) => [s.post_slug, s]));
 
 const confirmed = subscribers.filter((s) => s.status === 'confirmed');
@@ -226,6 +227,28 @@ const when = (value: string) =>
                     >
                       Hide
                     </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section class="mt-16">
+            <h2 class="eyebrow">In review ({drafts.length})</h2>
+
+            {drafts.length === 0 ? (
+              <p class="prose-body mt-5 text-[0.95rem]">
+                Nothing waiting. Anything marked <code>draft: true</code> shows up here.
+              </p>
+            ) : (
+              <ul class="mt-6 space-y-3">
+                {drafts.map((draft) => (
+                  <li class="rounded-xl border border-accent/40 bg-bg-raised px-5 py-4">
+                    <p class="text-sm font-semibold text-ink">{draft.data.title}</p>
+                    <p class="mt-1 text-xs text-muted">{draft.data.description}</p>
+                    <p class="mt-2 font-mono text-xs text-subtle">
+                      src/content/writing/{draft.id}.md
+                    </p>
                   </li>
                 ))}
               </ul>

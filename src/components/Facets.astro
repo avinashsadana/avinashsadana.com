@@ -1,5 +1,5 @@
 ---
-import { getBooks, getPosts } from '../lib/content';
+import { getBooks, getPublishedPosts } from '../lib/content';
 
 /**
  * The breadth, shown rather than claimed.
@@ -11,7 +11,7 @@ import { getBooks, getPosts } from '../lib/content';
  */
 
 const bookCount = (await getBooks()).length;
-const postCount = (await getPosts()).length;
+const postCount = (await getPublishedPosts()).length;
 
 const facets = [
   {

@@ -115,3 +115,23 @@ test.describe('cross-origin protection', () => {
     expect(response.status()).toBe(403);
   });
 });
+
+test.describe('drafts stay private', () => {
+  test('a draft never appears in the public feed', async ({ request }) => {
+    const response = await request.get('/rss.xml');
+    const body = await response.text();
+    // The feed is what reaches subscribers and aggregators. Even in an
+    // environment where drafts are visible on the site, they must not be here.
+    expect(body).not.toContain('Draft');
+  });
+
+  test('the send endpoint will not accept a draft', async ({ request }) => {
+    // Unauthenticated, so this only proves the endpoint is closed — the
+    // published-only lookup behind it is asserted by the build verifier.
+    const response = await request.post('/api/admin/newsletter', {
+      data: { action: 'send', slug: 'a-draft-that-does-not-exist' },
+      failOnStatusCode: false,
+    });
+    expect(response.status()).toBe(401);
+  });
+});

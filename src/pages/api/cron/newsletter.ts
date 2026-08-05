@@ -3,7 +3,7 @@ import type { APIRoute } from 'astro';
 import { fail, json } from '../../../lib/api';
 import { env } from '../../../lib/env';
 import { getSupabase, isSupabaseConfigured } from '../../../lib/supabase';
-import { getPosts } from '../../../lib/content';
+import { getPublishedPosts } from '../../../lib/content';
 import { site } from '../../../site.config';
 
 export const prerender = false;
@@ -31,7 +31,7 @@ export const GET: APIRoute = async ({ request }) => {
   if (!isSupabaseConfigured()) return fail('Database is not configured.', 503);
 
   const supabase = getSupabase();
-  const posts = await getPosts();
+  const posts = await getPublishedPosts();
   if (posts.length === 0) return json({ ok: true, prepared: 0, reason: 'no published posts' });
 
   const { data: sends, error } = await supabase

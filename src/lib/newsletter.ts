@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 import { env } from './env';
-import { getPosts, type Post } from './content';
+import { getPublishedPosts, type Post } from './content';
 import { site } from '../site.config';
 
 /**
@@ -192,6 +192,6 @@ export async function sendNewsletter(
 
 /** Published posts that have never been mailed, newest first. */
 export async function unsentPosts(sentSlugs: string[]): Promise<Post[]> {
-  const posts = await getPosts();
+  const posts = await getPublishedPosts();
   return posts.filter((post) => !sentSlugs.includes(post.id));
 }
