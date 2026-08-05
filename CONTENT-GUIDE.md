@@ -12,17 +12,11 @@ site down.
 
 ---
 
-## Step 0 — do this once
+## Publishing
 
-Your edits on GitHub will not go live until Vercel is allowed to watch the
-repository. It needs your browser, so it is the one thing that cannot be done
-for you.
-
-1. Open **https://vercel.com/avinash-792e/avinashsadana-com/settings/git**
-2. Click **Connect Git Repository**
-3. Choose **GitHub**, authorise it, and pick `avinashsadana/avinashsadana.com`
-
-You only ever do this once. After it, every edit publishes automatically.
+GitHub and Vercel are connected, so **every commit to `main` deploys itself**.
+Edit a file, commit it, and the change is live in about a minute. There is
+nothing else to run.
 
 ---
 
