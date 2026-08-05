@@ -1,4 +1,5 @@
 # The graphical timeline on the home page and /work.
+# (auto-deploy verified 22:09:53)
 #
 # lane must be one of: work | education | ventures | sport | creative
 # startYear / endYear are numbers. Leave endYear out for anything still running.
