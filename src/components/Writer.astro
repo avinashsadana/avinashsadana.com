@@ -195,7 +195,11 @@ const MAX_PHOTOS = 10;
         };
         image.onerror = () => {
           URL.revokeObjectURL(url);
-          reject(new Error('Could not read that image'));
+          reject(
+            new Error(
+              'Could not read that image — try a JPEG or PNG. iPhone HEIC files will not work.',
+            ),
+          );
         };
         image.src = url;
       });
@@ -229,6 +233,13 @@ const MAX_PHOTOS = 10;
       if (files.length > room) say('Only room for ' + room + ' more — using the first ' + room + '.');
 
       for (const [index, file] of chosen.entries()) {
+        if (/\.(heic|heif)$/i.test(file.name) || /heic|heif/i.test(file.type)) {
+          say(
+            'Browsers cannot read iPhone HEIC photos. In Photos, use Share → ' +
+              'Options → Most Compatible, or export it as JPEG first.',
+          );
+          return;
+        }
         say('Adding photo ' + (index + 1) + ' of ' + chosen.length + '…');
         try {
           const blob = await shrink(file);

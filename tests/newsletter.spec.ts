@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 import { db } from './helpers/db';
 
 /**
@@ -155,5 +156,27 @@ test.describe('writing from /admin', () => {
   test('a draft is not reachable from the public listing', async ({ request }) => {
     const listing = await (await request.get('/writing')).text();
     expect(listing).not.toContain('Draft — visible by link');
+  });
+});
+
+test.describe('photo upload prerequisites', () => {
+  test('the security policy permits the blob URLs the uploader needs', () => {
+    // The writing box reads a chosen file through URL.createObjectURL, which
+    // produces a blob: URL. A Content-Security-Policy without blob: in img-src
+    // silently breaks every upload — it did exactly that once, and the failure
+    // showed up only as "could not read that image".
+    //
+    // Asserted against vercel.json rather than a live response header, because
+    // the header is applied by Vercel and is absent from the dev server this
+    // suite runs against.
+    const config = JSON.parse(readFileSync('vercel.json', 'utf8'));
+    const csp = config.headers
+      .flatMap((entry: { headers: { key: string; value: string }[] }) => entry.headers)
+      .find((header: { key: string }) => header.key === 'Content-Security-Policy')?.value as string;
+
+    const imgSrc = csp.split(';').find((part) => part.trim().startsWith('img-src')) ?? '';
+
+    expect(imgSrc, 'img-src must allow blob: or every upload fails').toContain('blob:');
+    expect(imgSrc, 'img-src must allow the image host').toContain('supabase.co');
   });
 });
