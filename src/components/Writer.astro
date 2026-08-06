@@ -187,8 +187,26 @@ const MAX_PHOTOS = 10;
           canvas.width = Math.round(image.width * scale);
           canvas.height = Math.round(image.height * scale);
           canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+
+          // Not every browser can encode WebP from a canvas — Safari quietly
+          // returns a PNG instead, which for a 1600px photo is roughly 2.4 MB
+          // against 125 KB for the WebP. Ask for WebP, check what actually came
+          // back, and fall back to JPEG rather than shipping the PNG.
           canvas.toBlob(
-            (blob) => (blob ? resolve(blob) : reject(new Error('Could not process that image'))),
+            (webp) => {
+              if (webp && webp.type === 'image/webp') {
+                resolve(webp);
+                return;
+              }
+              canvas.toBlob(
+                (jpeg) =>
+                  jpeg
+                    ? resolve(jpeg)
+                    : reject(new Error('Could not process that image')),
+                'image/jpeg',
+                0.85,
+              );
+            },
             'image/webp',
             0.82,
           );
@@ -243,8 +261,9 @@ const MAX_PHOTOS = 10;
         say('Adding photo ' + (index + 1) + ' of ' + chosen.length + '…');
         try {
           const blob = await shrink(file);
+          const extension = blob.type === 'image/webp' ? 'webp' : 'jpg';
           const form = new FormData();
-          form.append('file', new File([blob], 'photo.webp', { type: 'image/webp' }));
+          form.append('file', new File([blob], 'photo.' + extension, { type: blob.type }));
 
           const response = await fetch('/api/admin/upload', { method: 'POST', body: form });
           const data = await response.json().catch(() => ({}));
