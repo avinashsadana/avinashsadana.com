@@ -67,7 +67,10 @@ ${entries
   return new Response(body, {
     headers: {
       'Content-Type': 'application/xml; charset=utf-8',
-      'Cache-Control': 'public, max-age=0, s-maxage=3600',
+      // Vercel's CDN reads this one; `Cache-Control` alone was being normalised
+      // away, so every crawler hit re-queried the database.
+      'CDN-Cache-Control': 'public, max-age=3600',
+      'Cache-Control': 'public, max-age=600',
     },
   });
 };
