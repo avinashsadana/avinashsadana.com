@@ -28,5 +28,17 @@
       "path": "/api/cron/newsletter",
       "schedule": "0 9 * * *"
     }
+  ],
+  "redirects": [
+    {
+      "source": "/sitemap-index.xml",
+      "destination": "/sitemap.xml",
+      "permanent": true
+    },
+    {
+      "source": "/sitemap-0.xml",
+      "destination": "/sitemap.xml",
+      "permanent": true
+    }
   ]
 }
