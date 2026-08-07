@@ -4,17 +4,35 @@ import Section from '../../components/Section.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { formatDate, isoDate } from '../../lib/content';
 import { getPublishedPosts, readingTime } from '../../lib/posts';
+import { site } from '../../site.config';
 
 // Rendered on demand so a newly published article appears immediately, rather
 // than waiting for a rebuild.
 export const prerender = false;
 
 const posts = await getPublishedPosts();
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Blog',
+  '@id': `${site.url}/writing#blog`,
+  name: 'Avinash Sadana — Writing',
+  description: 'Essays on business models, process, operations and endurance sport.',
+  url: `${site.url}/writing`,
+  author: { '@id': `${site.url}/#person` },
+  blogPost: posts.map((post) => ({
+    '@type': 'BlogPosting',
+    headline: post.title,
+    url: `${site.url}/writing/${post.slug}`,
+    datePublished: post.pubDate.toISOString(),
+  })),
+};
 ---
 
 <BaseLayout
   title="Writing"
   description="Essays by Avinash Sadana on business models, process, operations and endurance sport."
+  schema={schema}
 >
   <PageHeader
     eyebrow="Writing"

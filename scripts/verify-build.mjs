@@ -46,33 +46,13 @@ for (const page of expectedPages) {
 }
 
 // --- SEO artefacts -----------------------------------------------------------
-for (const asset of ['sitemap-index.xml', 'robots.txt', 'og.jpg', 'avinash-sadana.jpg', 'favicon.svg']) {
+for (const asset of ['robots.txt', 'og.jpg', 'avinash-sadana.jpg', 'favicon.svg']) {
   if (has(asset)) ok(`emitted ${asset}`);
   else fail(`missing asset: ${asset}`);
 }
 
-if (has('sitemap-index.xml')) {
-  const index = read('sitemap-index.xml');
-  const referenced = [...index.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
-  if (referenced.length === 0) fail('sitemap index references no sitemaps');
-
-  const urls = referenced
-    .map((url) => url.replace('https://avinashsadana.com/', ''))
-    .filter((name) => has(name))
-    .flatMap((name) => [...read(name).matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]));
-
-  if (urls.length < expectedPages.length - 2) {
-    fail(`sitemap lists only ${urls.length} URLs`);
-  } else {
-    ok(`sitemap lists ${urls.length} URLs`);
-  }
-
-  if (urls.some((url) => url.includes('/admin'))) fail('sitemap exposes /admin');
-  else ok('sitemap excludes /admin');
-
-  if (urls.some((url) => url.includes('/api/'))) fail('sitemap exposes API routes');
-  else ok('sitemap excludes API routes');
-}
+// The sitemap is generated on request from the database, so it is asserted by
+// the test suite against a running site rather than here.
 
 // --- Draft content must never ship ------------------------------------------
 function walk(dir) {

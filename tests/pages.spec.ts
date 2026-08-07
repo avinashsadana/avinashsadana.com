@@ -45,12 +45,12 @@ test('robots.txt is served and points at the sitemap', async ({ request }) => {
   expect(robots.status()).toBe(200);
 
   const body = await robots.text();
-  expect(body).toContain('Sitemap: https://avinashsadana.com/sitemap-index.xml');
+  expect(body).toContain('Sitemap: https://avinashsadana.com/sitemap.xml');
   expect(body, 'admin is not crawlable').toContain('Disallow: /admin');
 });
 
-// The sitemap itself is emitted at build time, so it is verified against the
-// build output by `npm run verify:build` rather than against the dev server.
+// The sitemap is generated on request now, so it is asserted directly further
+// down rather than against the build output.
 
 test('the RSS feed is valid XML', async ({ request }) => {
   const response = await request.get('/rss.xml');
@@ -105,4 +105,55 @@ test('content is readable with JavaScript disabled', async ({ browser }) => {
   expect(visibleText, 'substantial content renders without JS').toBeGreaterThan(800);
 
   await context.close();
+});
+
+test.describe('search engines can find everything', () => {
+  test('the sitemap includes every published article', async ({ request }) => {
+    // Articles are database-backed, so a build-time sitemap cannot see them —
+    // and once did not, leaving every article invisible to search engines.
+    const [sitemap, feed] = await Promise.all([
+      (await request.get('/sitemap.xml')).text(),
+      (await request.get('/rss.xml')).text(),
+    ]);
+
+    const articleUrls = [...feed.matchAll(/<link>([^<]*\/writing\/[^<]+)<\/link>/g)].map((m) =>
+      m[1].replace(/\/$/, ''),
+    );
+    expect(articleUrls.length, 'there are articles to check').toBeGreaterThan(0);
+
+    for (const url of articleUrls) {
+      expect(sitemap, `${url} must be in the sitemap`).toContain(url);
+    }
+  });
+
+  test('the sitemap excludes private and noindex pages', async ({ request }) => {
+    const sitemap = await (await request.get('/sitemap.xml')).text();
+    for (const path of ['/admin', '/subscribed', '/unsubscribed', '/api/']) {
+      expect(sitemap, `${path} must not be advertised to crawlers`).not.toContain(path);
+    }
+  });
+
+  test('the homepage heading reads as the full name', async ({ page }) => {
+    await page.goto('/');
+    // Two block spans concatenate for crawlers and screen readers; without a
+    // space between them this said "AvinashSadana".
+    const text = await page.locator('main h1').innerText();
+    expect(text.replace(/\s+/g, ' ').trim()).toBe('Avinash Sadana');
+  });
+
+  test('an article declares valid structured data with an image', async ({ page }) => {
+    await page.goto('/writing/bikepacking-what-you-carry');
+    const blocks = await page.locator('script[type="application/ld+json"]').allTextContents();
+    const graphs = blocks.map((b) => JSON.parse(b)).flatMap((b) => b['@graph'] ?? [b]);
+
+    const article = graphs.find((n) => n['@type'] === 'BlogPosting');
+    expect(article, 'BlogPosting present').toBeTruthy();
+    expect(article.image, 'articles need an image for rich results').toBeTruthy();
+    expect(article.headline.length, 'headline within Google’s limit').toBeLessThanOrEqual(110);
+    expect(article.datePublished).toBeTruthy();
+
+    const crumbs = graphs.find((n) => n['@type'] === 'BreadcrumbList');
+    expect(crumbs, 'breadcrumbs present').toBeTruthy();
+    expect(crumbs.itemListElement).toHaveLength(3);
+  });
 });

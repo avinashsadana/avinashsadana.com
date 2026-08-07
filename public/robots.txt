@@ -5,4 +5,4 @@ Allow: /
 Disallow: /admin
 Disallow: /api/
 
-Sitemap: https://avinashsadana.com/sitemap-index.xml
+Sitemap: https://avinashsadana.com/sitemap.xml

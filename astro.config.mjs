@@ -1,7 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import vercel from '@astrojs/vercel';
-import sitemap from '@astrojs/sitemap';
 import mdx from '@astrojs/mdx';
 import tailwindcss from '@tailwindcss/vite';
 
@@ -15,13 +14,9 @@ export default defineConfig({
     webAnalytics: { enabled: true },
     imageService: true,
   }),
-  integrations: [
-    mdx(),
-    sitemap({
-      // Keep private and machine-only routes out of the index, matching robots.txt.
-      filter: (page) => !page.includes('/api/') && !page.includes('/admin'),
-    }),
-  ],
+  // No build-time sitemap integration: articles live in the database, so the
+  // sitemap is generated on request at src/pages/sitemap.xml.ts instead.
+  integrations: [mdx()],
   // Astro's built-in cross-origin check is all-or-nothing, and it 403s the
   // one-click unsubscribe POST that Gmail and Outlook send. src/middleware.ts
   // reimplements the same rule with a single exception for that endpoint.

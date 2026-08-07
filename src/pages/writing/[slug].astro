@@ -16,17 +16,46 @@ if (!post) return Astro.rewrite('/404');
 
 const html = renderMarkdown(post.body);
 
+/**
+ * Google strongly prefers an article to declare an image. Use the first photo
+ * in the piece if there is one, and fall back to the site's share card so the
+ * field is never empty.
+ */
+const firstImage = post.body.match(/!\[[^\]]*\]\((https?:\/\/[^)\s]+)\)/)?.[1];
+
+const canonical = new URL(`/writing/${post.slug}`, site.url).href;
+
 const schema = {
   '@context': 'https://schema.org',
-  '@type': 'BlogPosting',
-  headline: post.title,
-  description: post.description,
-  datePublished: post.pubDate.toISOString(),
-  dateModified: post.updatedAt.toISOString(),
-  author: { '@id': `${site.url}/#person` },
-  publisher: { '@id': `${site.url}/#person` },
-  keywords: post.tags.join(', '),
-  mainEntityOfPage: new URL(Astro.url.pathname, Astro.site).href,
+  '@graph': [
+    {
+      '@type': 'BlogPosting',
+      '@id': `${canonical}#article`,
+      headline: post.title.slice(0, 110),
+      description: post.description,
+      image: firstImage ?? `${site.url}/og.jpg`,
+      datePublished: post.pubDate.toISOString(),
+      dateModified: post.updatedAt.toISOString(),
+      author: { '@id': `${site.url}/#person` },
+      publisher: { '@id': `${site.url}/#person` },
+      keywords: post.tags.join(', '),
+      articleSection: post.tags[0] ?? 'Essay',
+      wordCount: post.body.trim().split(/\s+/).filter(Boolean).length,
+      inLanguage: 'en',
+      isPartOf: { '@id': `${site.url}/#website` },
+      mainEntityOfPage: { '@id': canonical },
+    },
+    {
+      // Breadcrumbs give search results a readable path instead of a bare URL.
+      '@type': 'BreadcrumbList',
+      '@id': `${canonical}#breadcrumbs`,
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: site.url },
+        { '@type': 'ListItem', position: 2, name: 'Writing', item: `${site.url}/writing` },
+        { '@type': 'ListItem', position: 3, name: post.title },
+      ],
+    },
+  ],
 };
 
 const isDraft = post.status === 'draft';
