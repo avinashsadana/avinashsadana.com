@@ -194,6 +194,28 @@ which year it ran. Add it to `src/content/data/timeline.yaml` when you know.
 
 ---
 
+## Search engines
+
+Google Search Console is verified for avinashsadana.com by a DNS TXT record in
+Cloudflare, as a **Domain** property.
+
+The sitemap lives at `https://avinashsadana.com/sitemap.xml` and is generated
+from the database, so new articles appear in it the moment they are published —
+no rebuild needed. `robots.txt` points at it, so search engines find it on
+their own.
+
+Two things worth knowing if you ever touch this again:
+
+- A **Domain** property needs the **full URL** submitted in the Sitemaps box
+  (`https://avinashsadana.com/sitemap.xml`), not the bare filename. A URL-prefix
+  property is the opposite. Google's error message does not tell you which.
+- After publishing something you especially care about, paste its address into
+  the **URL Inspection** box at the top of Search Console and click **Request
+  Indexing**. For a site this size that gets it seen faster than waiting on the
+  sitemap.
+
+---
+
 ## Checking before you publish
 
 If you ever want to preview locally:
